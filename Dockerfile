@@ -1,33 +1,26 @@
 FROM ghcr.io/puppeteer/puppeteer:21.5.0
 
-# Switch to root to install dependencies (if any needed, though native image has them)
-# Actually, the image runs as 'pptruser' by default. 
-# We need to copy files as that user.
+# 1. Environment variables FIRST so npm install sees them
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 
 USER root
 WORKDIR /app
 
-# Copy package.json and install dependencies
+# 2. Copy package files
 COPY package*.json ./
-# Install deps (ci for clean install)
-RUN npm ci
 
-# Copy source code
+# 3. Install dependencies (npm install is safer than ci for cross-platform)
+# The skip_download env var above ensures we don't download chrome again
+RUN npm install
+
+# 4. Copy source code
 COPY . .
 
-# Provide write permissions to pptruser for cache if needed (though we used .puppeteerrc.cjs)
-# But here we use the installed chrome in the image.
-# We need to tell Puppeteer to use the INSTALLED chrome, OR let it download.
-# The base image has chrome installed at valid path.
-# We should set ENV variables to skip download and use installed chrome.
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-
-# Switch back to pptruser for security
+# 5. Switch back to pptruser for security
 USER pptruser
 
-# Expose port
+# 6. Start
 ENV PORT=8787
 EXPOSE 8787
-
-# Start the server
 CMD ["node", "server.js"]
