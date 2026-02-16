@@ -12,10 +12,19 @@ puppeteer.use(StealthPlugin());
 async function scrapeMetaAds(url, limit = 10) {
     let browser;
     try {
-        // Launch browser
+        // Launch browser with more stealth options and arguments for Render
         browser = await puppeteer.launch({
             headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-accelerated-2d-canvas',
+                '--no-first-run',
+                '--no-zygote',
+                '--single-process',
+                '--disable-gpu'
+            ]
         });
 
         const page = await browser.newPage();
@@ -25,7 +34,19 @@ async function scrapeMetaAds(url, limit = 10) {
         await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
 
         // Navigate
-        await page.goto(url, { waitUntil: 'networkidle2', timeout: 25000 });
+        console.log(`[Scraper] Navigating to ${url}`);
+        await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
+
+        // Debug info
+        const pageTitle = await page.title();
+        const currentUrl = page.url();
+        console.log(`[Scraper] Loaded. Title: "${pageTitle}", URL: "${currentUrl}"`);
+
+        // Check for Login Wall / Captcha
+        if (pageTitle.includes("Log In") || pageTitle.includes("로그인") || currentUrl.includes("login")) {
+            console.warn("[Scraper] Login Wall detected.");
+            throw new Error(`Login Wall detected. Title: ${pageTitle}`);
+        }
 
         // Scroll to trigger lazy loading
         await autoScroll(page);
@@ -33,9 +54,9 @@ async function scrapeMetaAds(url, limit = 10) {
         // Wait for ad cards (try multiple potential selectors)
         // Meta DOM is obfuscated, but usually has role="article" or specific divs
         try {
-            await page.waitForSelector('div[role="article"], div[data-pagelet]', { timeout: 5000 });
+            await page.waitForSelector('div[role="article"], div[data-pagelet]', { timeout: 8000 });
         } catch (e) {
-            // Continue even if timeout, might have loaded some
+            console.warn("[Scraper] Timeout waiting for selector. Attempting extraction anyway.");
         }
 
         // Extract Data using page.evaluate (Running logic inside browser)
@@ -113,15 +134,24 @@ async function scrapeMetaAds(url, limit = 10) {
             return results;
         }, limit);
 
+        if (ads.length === 0) {
+            return {
+                ok: false,
+                errorCode: "NO_ADS_FOUND",
+                messageKo: "광고를 찾지 못했습니다. (페이지 로드 성공했으나 데이터 없음)",
+                debug: `Title: ${pageTitle}, URL: ${currentUrl}`
+            };
+        }
+
         return { ok: true, items: ads };
 
     } catch (error) {
-        console.error("Scraping failed:", error);
+        console.error("[Scraper] Failed:", error);
         return {
             ok: false,
             errorCode: "SCRAPE_FAILED",
             messageKo: "메타 광고 라이브러리 접근에 실패했습니다. (일시적 차단 또는 로그인 필요)",
-            debug: error.message
+            debug: `${error.message}`
         };
     } finally {
         if (browser) await browser.close();
