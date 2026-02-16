@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: geun
+    env: docker
+    plan: free
+    branch: main
+    repo: https://github.com/Geun97/geun
+    envVars:
+      - key: PORT
+        value: 8787
