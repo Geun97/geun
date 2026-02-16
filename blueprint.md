@@ -1,76 +1,66 @@
-# **Project Blueprint: The Observer**
 
-## **1. Application Overview**
+# Meta Ad Analyzer - Blueprint
 
-**The Observer** is a web-based application designed for marketers, growth engineers, and creative strategists. It allows users to input their landing page and competitor advertising materials (from the Meta Ad Library) to generate a comprehensive, MECE-structured analysis.
+## 1. 프로젝트 개요
 
-The application deconstructs competitor ads, compares landing pages, identifies strategic gaps, and automatically generates creative strategies and A/B testing templates to accelerate growth.
+사용자의 서비스(랜딩 페이지)와 경쟁사의 광고(Meta Ad Library)를 입력받아, 광고 크리에이티브를 시각적으로 재구성하고, 시장 및 경쟁 상황을 MECE(Mutually Exclusive, Collectively Exhaustive) 구조로 심층 분석하여 크리에이티브 전략과 A/B 테스트용 랜딩 페이지 템플릿까지 제공하는 자동화된 인사이트 도출 서비스입니다.
 
----
+## 2. 애플리케이션 아키텍처 및 디자인
 
-## **2. Core Features & Architecture**
+- **2-Page SPA (Single Page Application):**
+    1.  **Composer Page (`/`):** 사용자가 분석에 필요한 모든 정보를 입력하는 페이지입니다.
+    2.  **Results Page (`/results`):** 분석 결과를 시각화하고, 전략 및 템플릿을 제공하는 페이지입니다.
+- **Web Components:** UI의 각 요소를 캡슐화된 웹 컴포넌트(`ad-composer`, `ad-results`, `ad-card`, `frame-gallery` 등)로 만들어 재사용성과 유지보수성을 높입니다.
+- **Styling:** "Bold Definition" 가이드라인에 따라 현대적이고 시각적으로 뛰어난 UI를 구현합니다. 그라데이션, 미묘한 텍스처, 깊이감 있는 그림자, 명확한 타이포그래피를 사용하여 전문적인 느낌을 강조합니다.
+- **State Management:** URL 라우팅으로 페이지 상태를 관리하고, `localStorage`를 통해 사용자의 입력 데이터를 유지하여 UX를 개선합니다.
 
-The application is a single-page application (SPA) built with modern, framework-less web technologies (Web Components, ES Modules). The workflow is divided into two main parts: **The Composer** (input) and **The Results** (output).
+## 3. 구현 계획 (PR 단위)
 
-### **2.1. The Composer (Input Stage)**
+### PR #1: UI 구조 및 입력 페이지(Composer) 구축
+- **작업 내용:**
+    - `index.html`을 2개의 메인 뷰(Composer, Results)를 담는 컨테이너로 재구성합니다.
+    - URL 해시(`#` 또는 `#results`)에 따라 적절한 뷰를 표시하는 간단한 라우팅 로직을 `main.js`에 추가합니다.
+    - `ad-composer` 웹 컴포넌트를 생성하여 입력 UI를 구현합니다.
+        - 내 서비스 URL, 경쟁사 URL, Meta Ad 링크 등 모든 입력 필드를 포함합니다.
+        - 미디어 업로드 및 상세 정보 입력을 위한 옵션 섹션을 제공합니다.
+    - 입력 값 검증(URL 형식, 필수 필드) 로직을 추가합니다.
+    - 모든 입력 내용은 `localStorage`에 자동으로 저장 및 복원되도록 구현하고, 초기화 버튼을 추가합니다.
+- **예상 결과물:** 기능적으로 동작하는 데이터 입력 페이지 완성.
 
-A comprehensive form interface for gathering all necessary data for the analysis.
+### PR #2: 결과 페이지(Results) - 광고 카드 및 프레임 갤러리
+- **작업 내용:**
+    - `ad-results` 웹 컴포넌트를 생성하여 결과 페이지의 레이아웃을 구성합니다.
+    - Meta Ad Library의 느낌을 재현하는 `ad-card` 웹 컴포넌트를 만듭니다.
+        - 광고주, 뱃지, 본문, 미디어, 헤드라인, CTA 등 모든 요소를 포함합니다.
+    - `frame-gallery` 웹 컴포넌트를 생성합니다.
+        - Feed(1:1, 4:5), Reels/Stories(9:16), Carousel 등 다양한 포맷의 프레임을 시각적으로 보여줍니다.
+        - 입력된 광고 데이터를 각 프레임에 매핑하여 어떻게 보일지 미리보기 기능을 제공합니다.
+- **예상 결과물:** 입력된 광고 소재가 다양한 포맷으로 시각화되어 결과 페이지에 표시됨.
 
-*   **My Service:**
-    *   [Required] Landing Page URL.
-    *   [Optional] Core Offer, Pricing, Social Proof, Constraints, FAQ.
-*   **Competitors (1-3):**
-    *   [Required] Landing Page URL.
-    *   [Required] Meta Ad Library URL.
-    *   [Optional] Ad Details: Primary Text, Headline, Description, CTA.
-    *   [Optional] Ad Format: Feed, Reels, Stories, Carousel.
-    *   [Optional] Media: File Upload or Media URL.
-*   **Key Functionality:**
-    *   **Dynamic Competitor Forms:** Users can add or remove up to three competitor sections.
-    *   **Input Validation:** Ensures all required fields and correct URL formats are provided.
-    *   **State Management:** All input values are automatically saved to `localStorage` and restored on page load. A "Clear All" button is available.
+### PR #3: 결과 페이지(Results) - 랜딩 페이지 비교 및 OG 데이터 연동
+- **작업 내용:**
+    - `landing-compare` 웹 컴포넌트를 만들어 내 랜딩 페이지와 경쟁사 랜딩 페이지를 나란히 비교하는 UI를 구현합니다.
+    - `/functions/api/og.js` 서버리스 함수를 활용하여 입력된 URL의 OG(Open Graph) 메타데이터(제목, 설명, 이미지)를 가져오는 로직을 추가합니다.
+    - OG 데이터 fetch 실패 시, 사용자가 직접 정보를 입력할 수 있는 UI로 자연스럽게 전환(Fallback)되는 기능을 구현합니다.
+- **예상 결과물:** 각 랜딩 페이지의 핵심 정보가 카드 형태로 비교/분석됨.
 
-### **2.2. The Results (Output Stage)**
+### PR #4: 자동 분석 엔진 및 산출물 생성
+- **작업 내용:**
+    - `AnalysisEngine.js` 모듈을 생성하여 모든 분석 로직을 집중시킵니다.
+    - 입력된 모든 데이터를 기반으로, 요청된 6가지 MECE 구조의 분석 산출물을 생성하는 함수를 구현합니다.
+        1.  시장 컨텍스트
+        2.  내 서비스 진단
+        3.  경쟁사 Top3 요약
+        4.  비교 인사이트
+        5.  크리에이티브 전략
+        6.  그로스 A/B 랜딩페이지 템플릿
+    - 결과 텍스트는 마크다운 형식으로 생성됩니다.
+- **예상 결과물:** 모든 사용자 입력을 종합하여 전문적인 분석 리포트가 텍스트 형태로 자동 생성됨.
 
-A structured, multi-section report generated from the user's input.
-
-*   **Analysis Summary:** A high-level overview of the competitive landscape (placeholder).
-*   **Landing Page Comparison (`LandingPageCompare` Component):**
-    *   Side-by-side comparison of "My Service" vs. "Competitors".
-    *   Pulls `og:image`, `title`, and `description` from URLs via a serverless function (`/api/og`).
-    *   Displays cards with a "lifted" feel, clear typography, and a distinct style for the user's service.
-*   **Ad Preview (`AdCard` Component):**
-    *   Visually reconstructs ads to mimic a standard social media feed ad.
-    *   Dynamically handles uploaded images, image URLs, or a placeholder if no media is provided.
-    *   Includes all key elements: Advertiser name, primary text, media, headline, description, and CTA.
-*   **Navigation:** A "Back to Edit" button allows for a seamless return to the Composer to refine inputs.
-
-### **2.3. Technical Implementation**
-
-*   **Frontend:** HTML5, CSS3, JavaScript (ESM).
-    *   **Web Components:** `observer-header`, `composer-form`, `landing-page-compare`, `ad-card` for creating encapsulated, reusable UI.
-    *   **Shadow DOM:** To prevent style conflicts and ensure component modularity.
-*   **Backend (Serverless):**
-    *   **Cloudflare Pages Functions:** A serverless function at `/functions/api/og.js` is used to fetch Open Graph metadata from user-provided URLs, bypassing browser CORS restrictions.
-*   **Styling:**
-    *   Modern CSS for layout and aesthetics, including Grid, Flexbox, and custom properties.
-    *   Component-specific styles are encapsulated within their Shadow DOM.
-*   **Data Persistence:** Browser `localStorage` for saving and retrieving form state across sessions.
-
----
-
-## **4. Development History**
-
-### **Phase 1: The Composer (Complete)**
-*   Rebuilt the input form into a stateful, dynamic interface using Web Components.
-*   Implemented `localStorage` for seamless state persistence.
-*   Added dynamic addition/removal of competitor fields.
-*   Established robust form validation.
-
-### **Phase 2: The Results Page (Complete)**
-*   Created a serverless function (`/api/og`) to fetch landing page metadata.
-*   Implemented the `handleSubmit` function to orchestrate data fetching and rendering.
-*   Developed the `LandingPageCompare` and `AdCard` Web Components.
-*   Injected premium, modern styling into the result components for a polished UI.
-*   Added the "Back to Edit" button and an "Analysis Summary" section to complete the user workflow.
-*   Finalized `style.css` for a cohesive application-wide design.
+### PR #5: 최종 통합 및 UX 개선
+- **작업 내용:**
+    - `AnalysisEngine`에서 생성된 마크다운 리포트를 결과 페이지에 렌더링합니다.
+    - 전체 결과를 클립보드로 복사하는 "Markdown Export" 버튼 기능을 구현합니다.
+    - 데이터 로딩, 에러 발생, 입력 정보 부족 등 다양한 상태에 대한 안내 메시지를 표시하여 UX를 개선합니다.
+    - 전체적인 스타일링과 디자인을 "Bold Definition" 가이드에 맞춰 최종 완성합니다.
+- **예상 결과물:** 모든 기능이 통합된 완성형 애플리케이션.

@@ -3,26 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Observer</title>
+    <title>Meta Ad Analyzer</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <observer-header></observer-header>
-
     <main>
-        <div id="composer-container">
-            <composer-form></composer-form>
+        <div id="composer-view">
+            <header class="hero-header">
+                <h1>Meta Ad Campaign Analyzer</h1>
+                <p class="subtitle">Just enter your landing page URL and your competitor's ad data to automatically analyze their campaigns and get strategic insights.</p>
+            </header>
+            <ad-composer></ad-composer>
         </div>
-        <div id="results-container" style="display: none;">
-            <!-- Results will be rendered here in Phase 2 -->
+        <div id="results-view" style="display: none;">
+            <!-- Results will be rendered here by the router -->
         </div>
     </main>
 
-    <!-- Template for a single competitor input block -->
+    <!-- Template for a single competitor input block for the AdComposer component -->
     <template id="competitor-template">
         <fieldset class="competitor-fieldset">
             <legend>Competitor</legend>
-            <button type="button" class="remove-competitor-btn">Remove</button>
+            <button type="button" class="remove-competitor-btn">&times;</button>
             <div class="form-grid">
                 <div class="full-width">
                     <label>Landing Page URL</label>
@@ -34,7 +36,7 @@
                 </div>
 
                 <div class="full-width optional-details">
-                    <p class="optional-toggle">Advanced Details (Optional)</p>
+                    <p class="optional-toggle"><span>+</span> Advanced Details (Recommended for accuracy)</p>
                     <div class="optional-content">
                         <div class="form-grid">
                             <div class="full-width">
@@ -86,12 +88,6 @@
             </div>
         </fieldset>
     </template>
-
-    <!-- Image Modal for Results Page -->
-    <div id="image-modal" class="modal-overlay" style="display: none;">
-      <span class="modal-close">&times;</span>
-      <img class="modal-content" id="modal-image-content">
-    </div>
 
     <script src="main.js" type="module"></script>
 </body>
