@@ -1,6 +1,10 @@
 import { state, updateMyData, updateCompetitorData, setDerivedData, resetState } from './state.js';
 import { generateAnalysis } from './templates.js';
 
+// Configuration: Change this to your Render Backend URL if deploying frontend separately
+// e.g., 'https://observer-scraper.onrender.com'
+const SCRAPER_BASE_URL = '';
+
 class AdComposer extends HTMLElement {
     constructor() {
         super();
@@ -28,7 +32,7 @@ class AdComposer extends HTMLElement {
                     <!-- My Card -->
                     <div class="card">
                         <div class="card-header">
-                            <h2>우리 서비스</h2>
+                            <h2>우리 서비스 (My Brand)</h2>
                             <span class="badge my">My Brand</span>
                         </div>
                         <div class="form-group">
@@ -36,19 +40,17 @@ class AdComposer extends HTMLElement {
                             <input type="url" id="my-landing-url" value="${state.my.landingUrl || ''}" placeholder="https://my-service.com">
                         </div>
                         <div class="form-group">
-                            <label>Meta 광고 라이브러리 URL (선택)</label>
-                            <input type="url" id="my-meta-url" value="${state.my.metaAdLibraryUrl || ''}" placeholder="https://facebook.com/ads/library/...">
+                            <label>Meta 광고 라이브러리 URL (필수)</label>
+                            <input type="url" id="my-meta-url" value="${state.my.metaAdLibraryUrl || ''}" placeholder="https://facebook.com/ads/library/?id=...">
                         </div>
-                        <div class="form-group">
-                            <label>Top Ads Data (JSON) - 선택 <small style="color:#666; font-weight:normal;">(Meta Ad Library 콘솔 추출)</small></label>
-                            <textarea id="my-json" rows="5" placeholder='[{"primary_text": "..."}]'>${state.my.topAdsJsonRaw || ''}</textarea>
-                        </div>
+                        <!-- Validated Status -->
+                        <div id="my-status" class="status-box"></div>
                     </div>
 
                     <!-- Competitor Card -->
                     <div class="card">
                         <div class="card-header">
-                            <h2>경쟁사</h2>
+                            <h2>경쟁사 (Competitor)</h2>
                             <span class="badge comp">Competitor</span>
                         </div>
                         <div class="form-group">
@@ -56,13 +58,11 @@ class AdComposer extends HTMLElement {
                             <input type="url" id="comp-landing-url" value="${state.competitor.landingUrl || ''}" placeholder="https://competitor.com">
                         </div>
                         <div class="form-group">
-                            <label>Meta 광고 라이브러리 URL (선택)</label>
-                            <input type="url" id="comp-meta-url" value="${state.competitor.metaAdLibraryUrl || ''}" placeholder="https://facebook.com/ads/library/...">
+                            <label>Meta 광고 라이브러리 URL (필수)</label>
+                            <input type="url" id="comp-meta-url" value="${state.competitor.metaAdLibraryUrl || ''}" placeholder="https://facebook.com/ads/library/?id=...">
                         </div>
-                        <div class="form-group">
-                            <label>Top Ads Data (JSON) - 선택</label>
-                            <textarea id="comp-json" rows="5" placeholder='[{"primary_text": "..."}]'>${state.competitor.topAdsJsonRaw || ''}</textarea>
-                        </div>
+                        <!-- Validated Status -->
+                        <div id="comp-status" class="status-box"></div>
                     </div>
                 </div>
 
@@ -70,19 +70,37 @@ class AdComposer extends HTMLElement {
                     <button id="btn-analyze" class="btn-primary">분석 시작하기 🚀</button>
                     <div id="error-msg" style="color:red; margin-top:10px;"></div>
                 </div>
+                
+                <p style="text-align:center; color:#666; font-size:0.8rem; margin-top:20px;">
+                    * 분석 시작 시 Meta 광고 라이브러리에서 최신 광고 데이터를 자동으로 수집합니다. (약 10~20초 소요)
+                </p>
             </div>
         `;
 
         // Bind Events
-        this.querySelector('#my-landing-url').addEventListener('change', e => updateMyData('landingUrl', e.target.value));
-        this.querySelector('#my-meta-url').addEventListener('change', e => updateMyData('metaAdLibraryUrl', e.target.value));
-        this.querySelector('#my-json').addEventListener('change', e => updateMyData('topAdsJsonRaw', e.target.value));
+        this.querySelector('#my-landing-url').addEventListener('change', e => {
+            updateMyData('landingUrl', e.target.value);
+            this.validateInput();
+        });
+        this.querySelector('#my-meta-url').addEventListener('change', e => {
+            updateMyData('metaAdLibraryUrl', e.target.value);
+            this.validateInput();
+        });
 
-        this.querySelector('#comp-landing-url').addEventListener('change', e => updateCompetitorData('landingUrl', e.target.value));
-        this.querySelector('#comp-meta-url').addEventListener('change', e => updateCompetitorData('metaAdLibraryUrl', e.target.value));
-        this.querySelector('#comp-json').addEventListener('change', e => updateCompetitorData('topAdsJsonRaw', e.target.value));
+        this.querySelector('#comp-landing-url').addEventListener('change', e => {
+            updateCompetitorData('landingUrl', e.target.value);
+            this.validateInput();
+        });
+        this.querySelector('#comp-meta-url').addEventListener('change', e => {
+            updateCompetitorData('metaAdLibraryUrl', e.target.value);
+            this.validateInput();
+        });
 
         this.querySelector('#btn-analyze').addEventListener('click', () => this.handleAnalyze());
+    }
+
+    validateInput() {
+        // Optional: Add visual validation logic here
     }
 
     // --- DASHBOARD VIEW ---
@@ -104,7 +122,7 @@ class AdComposer extends HTMLElement {
                 <div class="summary-cards">
                      <div class="summary-card">
                         <div class="value">${myAdsCount} vs ${compAdsCount}</div>
-                        <div class="label">광고 수 (내꺼 vs 경쟁사)</div>
+                        <div class="label">수집된 광고 수</div>
                     </div>
                     <div class="summary-card">
                         <div class="value">${matchScore}점</div>
@@ -121,25 +139,47 @@ class AdComposer extends HTMLElement {
                 </div>
 
                 <!-- Section 1: Source Info -->
-                <h3 class="section-title">1. 데이터 출처 및 수집 상태</h3>
+                <h3 class="section-title">1. 데이터 출처 및 수집 결과</h3>
                 <div class="card">
                      <p><strong>내 랜딩:</strong> <a href="${state.my.landingUrl}" target="_blank">${state.my.landingUrl}</a></p>
+                     <p><strong>내 광고 라이브러리:</strong> <a href="${state.my.metaAdLibraryUrl}" target="_blank">링크</a> (${state.my.topAds ? '✅ 수집 성공' : '❌ 수집 실패'})</p>
+                     <p style="font-size:0.8rem; color:#666;">${state.my.topAds ? '' : '* 광고를 찾을 수 없거나 접근이 차단되었습니다.'}</p>
+                     <hr>
                      <p><strong>경쟁사 랜딩:</strong> <a href="${state.competitor.landingUrl}" target="_blank">${state.competitor.landingUrl}</a></p>
-                     <p style="font-size:0.9rem; color:#666;">* Meta 광고 라이브러리와 HTML 소스 코드를 기반으로 분석되었습니다.</p>
+                     <p><strong>경쟁사 광고 라이브러리:</strong> <a href="${state.competitor.metaAdLibraryUrl}" target="_blank">링크</a> (${state.competitor.topAds ? '✅ 수집 성공' : '❌ 수집 실패'})</p>
+                     <p style="font-size:0.8rem; color:#666;">${state.competitor.topAds ? '' : '* 광고를 찾을 수 없거나 접근이 차단되었습니다.'}</p>
                 </div>
 
                 <!-- Section 2: Ad Analysis -->
-                <h3 class="section-title">2. 광고 크리에이티브 패턴 비교</h3>
+                <h3 class="section-title">2. 광고 크리에이티브 패턴 비교 (Top 10)</h3>
                 <div class="input-grid">
                     <div class="card">
                         <h4>📢 내 광고 패턴</h4>
-                        <p><strong>Hooks:</strong> ${d.ads.my?.hooks.join(', ') || '데이터 없음'}</p>
-                        <p><strong>Offers:</strong> ${d.ads.my?.offers.join(', ') || '-'}</p>
+                        <p><strong>Hooks:</strong> ${d.ads.my?.hooks.slice(0, 5).join(', ') || '데이터 없음'}</p>
+                        <p><strong>Offers:</strong> ${d.ads.my?.offers.slice(0, 3).join(', ') || '-'}</p>
+                        <div style="margin-top:15px; max-height:300px; overflow-y:auto;">
+                            ${(state.my.topAds || []).map(ad => `
+                                <div style="border-bottom:1px solid #eee; padding:8px 0;">
+                                    <div style="font-size:0.8rem; color:#888;">${ad.headline || 'No Headline'}</div>
+                                    <div style="font-size:0.9rem;">${ad.primary_text?.substring(0, 80)}...</div>
+                                    ${ad.media_preview_url ? `<img src="${ad.media_preview_url}" style="height:50px; margin-top:5px; border-radius:4px;">` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
                     </div>
                     <div class="card">
                         <h4>⚔️ 경쟁사 광고 패턴</h4>
-                        <p><strong>Hooks:</strong> ${d.ads.competitor?.hooks.join(', ') || '데이터 없음'}</p>
-                        <p><strong>Offers:</strong> ${d.ads.competitor?.offers.join(', ') || '-'}</p>
+                        <p><strong>Hooks:</strong> ${d.ads.competitor?.hooks.slice(0, 5).join(', ') || '데이터 없음'}</p>
+                        <p><strong>Offers:</strong> ${d.ads.competitor?.offers.slice(0, 3).join(', ') || '-'}</p>
+                        <div style="margin-top:15px; max-height:300px; overflow-y:auto;">
+                            ${(state.competitor.topAds || []).map(ad => `
+                                <div style="border-bottom:1px solid #eee; padding:8px 0;">
+                                    <div style="font-size:0.8rem; color:#888;">${ad.headline || 'No Headline'}</div>
+                                    <div style="font-size:0.9rem;">${ad.primary_text?.substring(0, 80)}...</div>
+                                    ${ad.media_preview_url ? `<img src="${ad.media_preview_url}" style="height:50px; margin-top:5px; border-radius:4px;">` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
                     </div>
                 </div>
 
@@ -213,35 +253,69 @@ class AdComposer extends HTMLElement {
         const btn = this.querySelector('#btn-analyze');
         const err = this.querySelector('#error-msg');
 
-        if (!state.my.landingUrl || !state.competitor.landingUrl) {
-            err.textContent = '랜딩 페이지 URL은 필수 입력 항목입니다.';
+        // Validation
+        const missing = [];
+        if (!state.my.landingUrl) missing.push("우리 랜딩 URL");
+        if (!state.my.metaAdLibraryUrl) missing.push("우리 Meta URL");
+        if (!state.competitor.landingUrl) missing.push("경쟁사 랜딩 URL");
+        if (!state.competitor.metaAdLibraryUrl) missing.push("경쟁사 Meta URL");
+
+        if (missing.length > 0) {
+            err.innerHTML = `필수 항목을 입력해주세요:<br>- ${missing.join('<br>- ')}`;
             return;
         }
 
-        btn.textContent = '분석중...';
+        btn.textContent = '데이터 수집 및 분석중... (약 20초)';
         btn.disabled = true;
         err.textContent = '';
 
-        // Simulate fetching or use pasted HTML
-        // const myPasted = this.querySelector('#my-html-paste')?.value; // REMOVED
-        // const compPasted = this.querySelector('#comp-html-paste')?.value; // REMOVED
-
-        // In a real app we would fetch here. For static, we rely on paste or just pass empty strings if CORS fails.
-        // We'll pass the pasted content as the "HTML Source".
-
-        // Wait a bit to simulate processing
-        setTimeout(() => {
+        const scrapeOne = async (url) => {
             try {
-                const derived = generateAnalysis(state, '', ''); // Removed HTML pasted content
-                setDerivedData(derived);
-                this.render(); // Re-render to dashboard
+                // Call Backend API
+                const endpoint = `${SCRAPER_BASE_URL}/api/scrape/meta-ads`;
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ metaAdLibraryUrl: url, limit: 10 })
+                });
+                const data = await res.json();
+                if (!data.ok) throw new Error(data.messageKo || data.errorCode);
+                return data.items;
             } catch (e) {
-                console.error(e);
-                err.textContent = '분석 중 오류가 발생했습니다. 데이터 형식을 확인해주세요.';
-                btn.textContent = '분석 시작하기 🚀';
-                btn.disabled = false;
+                console.warn(`Scrape failed for ${url}`, e);
+                return null; // Return null on failure but don't block everything
             }
-        }, 800);
+        };
+
+        try {
+            // Parallel Scraping
+            const [myAds, compAds] = await Promise.all([
+                scrapeOne(state.my.metaAdLibraryUrl),
+                scrapeOne(state.competitor.metaAdLibraryUrl)
+            ]);
+
+            // Note: If both fail, we might want to stop, but for now we proceed with partial data
+            if (!myAds && !compAds) {
+                throw new Error("광고 데이터 수집에 실패했습니다. (메타 라이브러리 접근 불가 등)");
+            }
+
+            // Update State with Scraped Data
+            if (myAds) updateMyData('topAds', myAds);
+            if (compAds) updateCompetitorData('topAds', compAds);
+
+            // Generate Analysis
+            // We pass empty strings for HTML source for now
+            const derived = generateAnalysis(state, '', '');
+            setDerivedData(derived);
+
+            this.render(); // Show Dashboard
+
+        } catch (e) {
+            console.error(e);
+            err.textContent = e.message || '분석 중 치명적인 오류가 발생했습니다.';
+            btn.textContent = '분석 시작하기 🚀';
+            btn.disabled = false;
+        }
     }
 }
 

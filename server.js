@@ -1,26 +1,50 @@
-import express from "express";
-import cors from "cors";
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
+const { scrapeMetaAds } = require('./scraper');
 
 const app = express();
+const PORT = process.env.PORT || 8787;
+
+// Middleware
 app.use(cors());
-app.use(express.json({ limit: "2mb" }));
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
-app.get("/", (req, res) => res.send("Observer API Running"));
-app.get("/health", (req, res) => res.json({ ok: true }));
+// API: Scrape Meta Ads
+app.post('/api/scrape/meta-ads', async (req, res) => {
+  const { metaAdLibraryUrl, limit = 10 } = req.body;
 
-app.post("/api/analyze", async (req, res) => {
-  const { myLandingUrl, competitors = [] } = req.body || {};
-
-  if (!myLandingUrl || !competitors.length) {
-    return res.status(400).json({ error: "missing input" });
+  if (!metaAdLibraryUrl) {
+    return res.status(400).json({
+      ok: false,
+      errorCode: "MISSING_URL",
+      messageKo: "Meta 광고 라이브러리 URL이 필요합니다."
+    });
   }
 
-  return res.json({
-    my: { landing: { url: myLandingUrl } },
-    competitors: [],
-    meta: { demoModeUsed: false }
-  });
+  console.log(`[Scrape] Starting for: ${metaAdLibraryUrl}`);
+
+  try {
+    const result = await scrapeMetaAds(metaAdLibraryUrl, limit);
+    res.json(result);
+  } catch (error) {
+    console.error("[Scrape] Error:", error);
+    res.status(500).json({
+      ok: false,
+      errorCode: "INTERNAL_ERROR",
+      messageKo: "서버 내부 오류가 발생했습니다."
+    });
+  }
 });
 
-const PORT = process.env.PORT || 8787;
-app.listen(PORT, () => console.log(`Server running on ${PORT}`));
+// Fallback for SPA (if we had client-side routing, but here just serve index)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log(`- Frontend: http://localhost:${PORT}`);
+  console.log(`- Scraper API: http://localhost:${PORT}/api/scrape/meta-ads`);
+});
