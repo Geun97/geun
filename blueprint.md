@@ -26,65 +26,51 @@ A comprehensive form interface for gathering all necessary data for the analysis
     *   [Optional] Ad Format: Feed, Reels, Stories, Carousel.
     *   [Optional] Media: File Upload or Media URL.
 *   **Key Functionality:**
-    *   **Dynamic Competitor Forms:** Users can add or remove competitor sections.
+    *   **Dynamic Competitor Forms:** Users can add or remove up to three competitor sections.
     *   **Input Validation:** Ensures all required fields and correct URL formats are provided.
-    *   **State Management:** All input values are automatically saved to `localStorage` and restored on page load. A "Reset" button is available.
+    *   **State Management:** All input values are automatically saved to `localStorage` and restored on page load. A "Clear All" button is available.
 
 ### **2.2. The Results (Output Stage)**
 
 A structured, multi-section report generated from the user's input.
 
-*   **Ad Preview (`AdCard` Component):**
-    *   Visually reconstructs ads to mimic the Meta Ad Library UI.
-    *   Supports various formats (Image, Video, Carousel) and layouts (1:1, 4:5, 9:16).
-    *   Includes all key elements: Advertiser, text, media, CTA, etc.
-*   **Frame Gallery:**
-    *   Displays the user's and competitors' ads within different standard creative frames (e.g., Reels with safe zones).
-*   **Landing Page Comparison:**
+*   **Analysis Summary:** A high-level overview of the competitive landscape (placeholder).
+*   **Landing Page Comparison (`LandingPageCompare` Component):**
     *   Side-by-side comparison of "My Service" vs. "Competitors".
-    *   Pulls `og:image`, `title`, and `description` from URLs via a server-side function.
-    *   Displays key elements like Core Value, CTA, and Trust Elements.
-*   **MECE Analysis & Strategy:**
-    *   A multi-part, auto-generated report containing:
-        1.  **Market Context:** Customer problems, resistance, and competitive landscape.
-        2.  **My Service Diagnosis:** Analysis of the user's own landing page funnel.
-        3.  **Competitor Deep-Dive:** Funnel analysis for each competitor.
-        4.  **MECE Comparison Matrix:** A structured comparison of hooks, messaging, offers, and proof.
-        5.  **Creative Strategy:** Actionable A/B test ideas and format recommendations.
-        6.  **Growth Landing Page Template:** A ready-to-use A/B test plan with hypothesis, metrics, and sample copy.
-    *   **Exportable:** The entire analysis can be copied to the clipboard as Markdown.
+    *   Pulls `og:image`, `title`, and `description` from URLs via a serverless function (`/api/og`).
+    *   Displays cards with a "lifted" feel, clear typography, and a distinct style for the user's service.
+*   **Ad Preview (`AdCard` Component):**
+    *   Visually reconstructs ads to mimic a standard social media feed ad.
+    *   Dynamically handles uploaded images, image URLs, or a placeholder if no media is provided.
+    *   Includes all key elements: Advertiser name, primary text, media, headline, description, and CTA.
+*   **Navigation:** A "Back to Edit" button allows for a seamless return to the Composer to refine inputs.
 
 ### **2.3. Technical Implementation**
 
 *   **Frontend:** HTML5, CSS3, JavaScript (ESM).
-    *   **Web Components:** For creating encapsulated, reusable UI elements (`AdCard`, `LandingCompare`, etc.).
-    *   **Shadow DOM:** To prevent style conflicts.
+    *   **Web Components:** `observer-header`, `composer-form`, `landing-page-compare`, `ad-card` for creating encapsulated, reusable UI.
+    *   **Shadow DOM:** To prevent style conflicts and ensure component modularity.
 *   **Backend (Serverless):**
-    *   **Cloudflare Pages Functions:** A serverless function (`/api/og`) will be used to fetch Open Graph metadata from URLs, bypassing browser CORS restrictions.
+    *   **Cloudflare Pages Functions:** A serverless function at `/functions/api/og.js` is used to fetch Open Graph metadata from user-provided URLs, bypassing browser CORS restrictions.
 *   **Styling:**
-    *   Modern CSS features (Container Queries, Cascade Layers, `:has()`).
-    *   CSS Variables for robust theming (Light/Dark mode).
-*   **Data Persistence:** Browser `localStorage` for form state.
+    *   Modern CSS for layout and aesthetics, including Grid, Flexbox, and custom properties.
+    *   Component-specific styles are encapsulated within their Shadow DOM.
+*   **Data Persistence:** Browser `localStorage` for saving and retrieving form state across sessions.
 
 ---
 
-## **3. Current Development Plan: Phase 1 - The Composer**
+## **4. Development History**
 
-This phase focuses on completely rebuilding the input form to match the new, detailed requirements.
+### **Phase 1: The Composer (Complete)**
+*   Rebuilt the input form into a stateful, dynamic interface using Web Components.
+*   Implemented `localStorage` for seamless state persistence.
+*   Added dynamic addition/removal of competitor fields.
+*   Established robust form validation.
 
-1.  **Blueprint Finalization:** The existing `blueprint.md` will be replaced with this document.
-2.  **HTML Refactoring (`index.html`):**
-    *   The existing `<url-input-form>` will be removed.
-    *   A new, highly-structured form will be created.
-    *   A `<template>` for the repeatable competitor section will be defined.
-    *   Sections for "My Service" and "Competitors" will be clearly laid out with all the new required and optional fields.
-3.  **JavaScript Logic (`main.js`):**
-    *   The `UrlInputForm` custom element will be entirely rewritten.
-    *   It will manage the state of all new input fields.
-    *   Functions will be implemented to dynamically add and remove competitor form sections based on the template.
-    *   A robust `saveState` and `loadState` method will be created to interact with `localStorage`.
-    *   Input validation logic will be added to the "Analyze" button's event listener.
-4.  **CSS Styling (`style.css`):**
-    *   New styles will be added to make the complex form intuitive and visually appealing.
-    *   Styles for input groups, labels, and buttons will be refined.
-
+### **Phase 2: The Results Page (Complete)**
+*   Created a serverless function (`/api/og`) to fetch landing page metadata.
+*   Implemented the `handleSubmit` function to orchestrate data fetching and rendering.
+*   Developed the `LandingPageCompare` and `AdCard` Web Components.
+*   Injected premium, modern styling into the result components for a polished UI.
+*   Added the "Back to Edit" button and an "Analysis Summary" section to complete the user workflow.
+*   Finalized `style.css` for a cohesive application-wide design.

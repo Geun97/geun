@@ -1,8 +1,8 @@
 /* Basic styles for the new layout */
 body {
-    font-family: sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background-color: #f0f2f5;
-    color: #333;
+    color: #1c1e21;
     margin: 0;
 }
 
@@ -14,149 +14,66 @@ main {
 
 observer-header {
     display: block;
-    background-color: #fff;
-    padding: 1rem 2rem;
-    border-bottom: 1px solid #ddd;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #0078FF;
 }
 
 #composer-container {
     background-color: #fff;
     padding: 2rem;
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
-h1 {
+/* Results Page Styles */
+#results-container {
+    display: none; /* Initially hidden */
+}
+
+#back-to-edit-btn {
+    background: none;
+    border: 1px solid #ccc;
+    color: #333;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-bottom: 2rem;
+    display: block;
+}
+
+.results-section {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    margin-bottom: 2rem;
+}
+
+.results-section h2 {
     font-size: 1.8rem;
     margin-top: 0;
-}
-
-fieldset {
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    padding: 1.5rem;
     margin-bottom: 1.5rem;
+    color: #000;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 1rem;
 }
 
-legend {
-    font-weight: bold;
-    font-size: 1.2rem;
-    padding: 0 0.5rem;
-    color: #333;
-}
-
-.form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-}
-
-.full-width {
-    grid-column: 1 / -1;
-}
-
-label {
-    display: block;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    font-size: 0.9rem;
-}
-
-input[type="url"],
-input[type="text"],
-textarea,
-select {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1rem;
-    box-sizing: border-box; /* Important */
-    transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-input:focus, select:focus, textarea:focus {
-    outline: none;
-    border-color: #0078FF;
-    box-shadow: 0 0 0 2px rgba(0, 120, 255, 0.2);
-}
-
-textarea {
-    resize: vertical;
-}
-
-.optional-toggle {
-    color: #0078FF;
-    cursor: pointer;
-    font-weight: 600;
-    margin-bottom: 1rem;
-}
-
-.optional-content {
-    display: none;
-    padding-top: 1rem;
-    border-top: 1px dashed #ccc;
-}
-
-.optional-content.visible {
-    display: block;
-}
-
-.competitor-fieldset {
-    position: relative;
-    border-color: #e0e0e0;
-}
-
-.remove-competitor-btn {
-    position: absolute;
-    top: 1.2rem;
-    right: 1.5rem;
-    background: #ff4d4d;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 0.3rem 0.6rem;
-    cursor: pointer;
-    font-size: 0.8rem;
-}
-
-.form-actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 2rem;
-    border-top: 1px solid #eee;
-    padding-top: 2rem;
-}
-
-button {
-    padding: 0.8rem 1.5rem;
-    border-radius: 6px;
-    border: none;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-#add-competitor-btn {
-    background-color: #e9ecef;
-    color: #333;
-    border: 1px solid #ccc;
-}
-
-#analyze-btn {
-    background-color: #0078FF;
-    color: white;
-}
-
-#reset-btn {
-    background: none;
-    border: none;
-    color: #6c757d;
-    text-decoration: underline;
-}
+/* Form Styles (from previous step, condensed) */
+h1 { font-size: 1.8rem; margin-top: 0; }
+fieldset { border: 1px solid #ddd; border-radius: 6px; padding: 1.5rem; margin-bottom: 1.5rem; }
+legend { font-weight: bold; font-size: 1.2rem; padding: 0 0.5rem; color: #333; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+.full-width { grid-column: 1 / -1; }
+label { display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem; }
+input[type="url"], input[type="text"], textarea, select { width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; box-sizing: border-box; transition: border-color 0.2s, box-shadow 0.2s; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: #0078FF; box-shadow: 0 0 0 2px rgba(0, 120, 255, 0.2); }
+textarea { resize: vertical; }
+.optional-toggle { color: #0078FF; cursor: pointer; font-weight: 600; margin-bottom: 1rem; }
+.optional-content { display: none; padding-top: 1rem; border-top: 1px dashed #ccc; }
+.optional-content.visible { display: block; }
+.competitor-fieldset { position: relative; border-color: #e0e0e0; }
+.remove-competitor-btn { position: absolute; top: 1.2rem; right: 1.5rem; background: #ff4d4d; color: white; border: none; border-radius: 4px; padding: 0.3rem 0.6rem; cursor: pointer; font-size: 0.8rem; }
+.form-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; border-top: 1px solid #eee; padding-top: 2rem; }
+button { padding: 0.8rem 1.5rem; border-radius: 6px; border: none; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background-color 0.2s; }
+#add-competitor-btn { background-color: #e9ecef; color: #333; border: 1px solid #ccc; }
+#analyze-btn { background-color: #0078FF; color: white; }
+#reset-btn { background: none; border: none; color: #6c757d; text-decoration: underline; }
