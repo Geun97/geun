@@ -20,8 +20,7 @@ COPY . .
 # We need to tell Puppeteer to use the INSTALLED chrome, OR let it download.
 # The base image has chrome installed at valid path.
 # We should set ENV variables to skip download and use installed chrome.
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
 # Switch back to pptruser for security
 USER pptruser

@@ -11,6 +11,11 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// API: Health Check (Simple)
+app.get('/api/health', (req, res) => {
+  res.json({ ok: true, message: "Server is running (Docker/Node)", timestamp: new Date().toISOString() });
+});
+
 // API: Scrape Meta Ads
 app.post('/api/scrape/meta-ads', async (req, res) => {
   const { metaAdLibraryUrl, limit = 10 } = req.body;
@@ -33,7 +38,8 @@ app.post('/api/scrape/meta-ads', async (req, res) => {
     res.status(500).json({
       ok: false,
       errorCode: "INTERNAL_ERROR",
-      messageKo: "서버 내부 오류가 발생했습니다."
+      messageKo: "서버 내부 오류가 발생했습니다.",
+      debug: error.message
     });
   }
 });
