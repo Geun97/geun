@@ -148,11 +148,18 @@ async function scrapeMetaAds(url, limit = 10) {
         }, limit);
 
         if (ads.length === 0) {
+            // Capture screenshot for debugging no ads
+            let screenshot = null;
+            try {
+                screenshot = await page.screenshot({ encoding: 'base64', type: 'jpeg', quality: 50 });
+            } catch (e) { }
+
             return {
                 ok: false,
                 errorCode: "NO_ADS_FOUND",
                 messageKo: "광고를 찾지 못했습니다. (페이지 로드 성공했으나 데이터 없음)",
-                debug: `Title: ${pageTitle}, URL: ${currentUrl}`
+                debug: `Title: ${pageTitle}, URL: ${currentUrl}`,
+                debugScreenshot: screenshot
             };
         }
 
@@ -160,11 +167,19 @@ async function scrapeMetaAds(url, limit = 10) {
 
     } catch (error) {
         console.error("[Scraper] Failed:", error);
+
+        // Capture screenshot for debugging error
+        let screenshot = null;
+        try {
+            if (page) screenshot = await page.screenshot({ encoding: 'base64', type: 'jpeg', quality: 50 });
+        } catch (e) { }
+
         return {
             ok: false,
             errorCode: "SCRAPE_FAILED",
-            messageKo: "메타 광고 라이브러리 접근에 실패했습니다. (Render Free Plan 메모리 부족 또는 차단)",
-            debug: `${error.message}`
+            messageKo: "메타 광고 라이브러리 접근에 실패했습니다. (차단됨 또는 오류)",
+            debug: `${error.message}`,
+            debugScreenshot: screenshot
         };
     } finally {
         if (browser) await browser.close();
