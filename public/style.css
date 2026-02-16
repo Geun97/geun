@@ -1,0 +1,9 @@
+
+body {
+    font-family: sans-serif;
+}
+
+#composer-view, #results-view {
+    padding: 1rem;
+}
+
