@@ -1,4 +1,3 @@
-
 import { state, updateMyData, updateCompetitorData, setDerivedData, resetState } from './state.js';
 import { generateAnalysis } from './templates.js';
 
@@ -224,8 +223,8 @@ class AdComposer extends HTMLElement {
         err.textContent = '';
 
         // Simulate fetching or use pasted HTML
-        const myPasted = this.querySelector('#my-html-paste')?.value;
-        const compPasted = this.querySelector('#comp-html-paste')?.value;
+        // const myPasted = this.querySelector('#my-html-paste')?.value; // REMOVED
+        // const compPasted = this.querySelector('#comp-html-paste')?.value; // REMOVED
 
         // In a real app we would fetch here. For static, we rely on paste or just pass empty strings if CORS fails.
         // We'll pass the pasted content as the "HTML Source".
@@ -233,7 +232,7 @@ class AdComposer extends HTMLElement {
         // Wait a bit to simulate processing
         setTimeout(() => {
             try {
-                const derived = generateAnalysis(state, myPasted, compPasted);
+                const derived = generateAnalysis(state, '', ''); // Removed HTML pasted content
                 setDerivedData(derived);
                 this.render(); // Re-render to dashboard
             } catch (e) {
@@ -253,4 +252,3 @@ const render = () => {
 };
 
 export { render };
-
