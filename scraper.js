@@ -33,6 +33,17 @@ async function scrapeMetaAds(url, limit = 10) {
         await page.setViewport({ width: 1280, height: 800 });
         await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
 
+        // Optimization: Block images, fonts, css to save memory (Render Free Tier has ~512MB)
+        await page.setRequestInterception(true);
+        page.on('request', (req) => {
+            const type = req.resourceType();
+            if (['image', 'stylesheet', 'font', 'media'].includes(type)) {
+                req.abort();
+            } else {
+                req.continue();
+            }
+        });
+
         // Navigate
         console.log(`[Scraper] Navigating to ${url}`);
         await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
@@ -150,7 +161,7 @@ async function scrapeMetaAds(url, limit = 10) {
         return {
             ok: false,
             errorCode: "SCRAPE_FAILED",
-            messageKo: "메타 광고 라이브러리 접근에 실패했습니다. (일시적 차단 또는 로그인 필요)",
+            messageKo: "메타 광고 라이브러리 접근에 실패했습니다. (Render Free Plan 메모리 부족 또는 차단)",
             debug: `${error.message}`
         };
     } finally {
