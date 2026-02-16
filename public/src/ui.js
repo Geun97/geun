@@ -3,7 +3,7 @@ import { generateAnalysis } from './templates.js';
 
 // Configuration: Change this to your Render Backend URL if deploying frontend separately
 // e.g., 'https://observer-scraper.onrender.com'
-const SCRAPER_BASE_URL = '';
+const SCRAPER_BASE_URL = 'https://geun.onrender.com';
 
 class AdComposer extends HTMLElement {
     constructor() {
