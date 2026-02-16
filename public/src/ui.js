@@ -41,13 +41,8 @@ class AdComposer extends HTMLElement {
                             <input type="url" id="my-meta-url" value="${state.my.metaAdLibraryUrl || ''}" placeholder="https://facebook.com/ads/library/...">
                         </div>
                         <div class="form-group">
-                            <label>Top Ads Data (JSON) - 선택</label>
+                            <label>Top Ads Data (JSON) - 선택 <small style="color:#666; font-weight:normal;">(Meta Ad Library 콘솔 추출)</small></label>
                             <textarea id="my-json" rows="5" placeholder='[{"primary_text": "..."}]'>${state.my.topAdsJsonRaw || ''}</textarea>
-                        </div>
-                         <!-- Fallback for HTML Paste -->
-                        <div class="form-group" style="margin-top:20px; border-top:1px dashed #ddd; padding-top:10px;">
-                            <label>마동 HTML 붙여넣기 (고급 옵션 - CORS 우회용)</label>
-                            <textarea id="my-html-paste" rows="3" placeholder="<html>... 만약 URL 분석이 실패하면 여기에 소스를 붙여넣으세요."></textarea>
                         </div>
                     </div>
 
@@ -68,10 +63,6 @@ class AdComposer extends HTMLElement {
                         <div class="form-group">
                             <label>Top Ads Data (JSON) - 선택</label>
                             <textarea id="comp-json" rows="5" placeholder='[{"primary_text": "..."}]'>${state.competitor.topAdsJsonRaw || ''}</textarea>
-                        </div>
-                         <div class="form-group" style="margin-top:20px; border-top:1px dashed #ddd; padding-top:10px;">
-                            <label>수동 HTML 붙여넣기 (고급 옵션 - CORS 우회용)</label>
-                            <textarea id="comp-html-paste" rows="3" placeholder="<html>..."></textarea>
                         </div>
                     </div>
                 </div>
