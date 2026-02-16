@@ -4,12 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "deploy": "wrangler pages deploy ./public --project-name geuni --branch main"
+    "serve": "python3 -m http.server 0 -d public",
+    "predeploy": "rm -rf dist && cp -R public dist && COMMIT=$(git rev-parse --short HEAD) && sed \"s/__COMMIT__/${COMMIT}/g\" dist/index.html > dist/index.tmp && mv dist/index.tmp dist/index.html",
+    "deploy": "gh-pages -d dist"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "wrangler": "^3.0.0"
+    "wrangler": "^3.0.0",
+    "gh-pages": "^3.2.3"
   }
 }
