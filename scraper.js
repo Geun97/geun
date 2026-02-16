@@ -46,7 +46,8 @@ async function scrapeMetaAds(url, limit = 10) {
 
         // Navigate
         console.log(`[Scraper] Navigating to ${url}`);
-        await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
+        // Change from networkidle2 to domcontentloaded to prevent hanging on background requests
+        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
 
         // Debug info
         const pageTitle = await page.title();
@@ -58,6 +59,15 @@ async function scrapeMetaAds(url, limit = 10) {
             console.warn("[Scraper] Login Wall detected.");
             throw new Error(`Login Wall detected. Title: ${pageTitle}`);
         }
+
+        // Wait for *some* content to ensure it's not a blank page
+        // 5 seconds max waiting for body/div
+        try {
+            await page.waitForSelector('body', { timeout: 5000 });
+        } catch (e) { }
+
+        // Scroll to trigger lazy loading
+        await autoScroll(page);
 
         // Scroll to trigger lazy loading
         await autoScroll(page);
