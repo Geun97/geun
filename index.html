@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meta Ad Analyzer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main>
+        <div id="composer-view">
+            <header class="hero-header">
+                <h1>Meta Ad Campaign Analyzer</h1>
+                <p class="subtitle">Just enter your landing page URL and your competitor's ad data to automatically analyze their campaigns and get strategic insights.</p>
+            </header>
+            <ad-composer></ad-composer>
+        </div>
+        <div id="results-view" style="display: none;">
+            <!-- Results will be rendered here by the router -->
+        </div>
+    </main>
+
+    <!-- Template for a single competitor input block for the AdComposer component -->
+    <template id="competitor-template">
+        <fieldset class="competitor-fieldset">
+            <legend>Competitor</legend>
+            <button type="button" class="remove-competitor-btn">&times;</button>
+            <div class="form-grid">
+                <div class="full-width">
+                    <label>Landing Page URL</label>
+                    <input type="url" name="competitor_landing_url" required placeholder="https://competitor.com">
+                </div>
+                <div class="full-width">
+                    <label>Meta Ad Library Link</label>
+                    <input type="url" name="competitor_ad_link" required placeholder="https://www.facebook.com/ads/library/?id=...">
+                </div>
+
+                <div class="full-width optional-details">
+                    <p class="optional-toggle"><span>+</span> Advanced Details (Recommended for accuracy)</p>
+                    <div class="optional-content">
+                        <div class="form-grid">
+                            <div class="full-width">
+                                <label>Primary Text</label>
+                                <textarea name="ad_primary_text" rows="3" placeholder="The main copy of the ad..."></textarea>
+                            </div>
+                            <div>
+                                <label>Headline</label>
+                                <input type="text" name="ad_headline" placeholder="A catchy headline">
+                            </div>
+                            <div>
+                                <label>Description</label>
+                                <input type="text" name="ad_description" placeholder="Additional details or description">
+                            </div>
+                            <div>
+                                <label>CTA</label>
+                                <select name="ad_cta">
+                                    <option value="">Select CTA</option>
+                                    <option>Shop Now</option>
+                                    <option>Learn More</option>
+                                    <option>Sign Up</option>
+                                    <option>Book Now</option>
+                                    <option>Download</option>
+                                    <option>Get Offer</option>
+                                    <option>Subscribe</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Ad Format</label>
+                                <select name="ad_format">
+                                    <option value="">Select Format</option>
+                                    <option>Feed (Image/Video)</option>
+                                    <option>Reels</option>
+                                    <option>Stories</option>
+                                    <option>Carousel</option>
+                                </select>
+                            </div>
+                             <div class="full-width">
+                                <label>Media URL</label>
+                                <input type="url" name="ad_media_url" placeholder="https://.../video.mp4 or image.jpg">
+                            </div>
+                            <div class="full-width">
+                                <label>Or Upload Media</label>
+                                <input type="file" name="ad_media_file" accept="image/*,video/*">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+    </template>
+
+    <script src="main.js" type="module"></script>
+</body>
+</html>
