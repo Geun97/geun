@@ -33,16 +33,8 @@ async function scrapeMetaAds(url, limit = 10) {
         await page.setViewport({ width: 1280, height: 800 });
         await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
 
-        // Optimization: Block images, fonts, css to save memory (Render Free Tier has ~512MB)
-        await page.setRequestInterception(true);
-        page.on('request', (req) => {
-            const type = req.resourceType();
-            if (['image', 'stylesheet', 'font', 'media'].includes(type)) {
-                req.abort();
-            } else {
-                req.continue();
-            }
-        });
+        // Removed Request Interception (Resource Blocking) to prevent hangs
+        // Some sites hang if CSS/Fonts are blocked.
 
         // Navigate
         console.log(`[Scraper] Navigating to ${url}`);
