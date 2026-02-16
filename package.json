@@ -2,8 +2,9 @@
   "name": "geun",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
+    "start": "node server.js",
     "serve": "python3 -m http.server 0 -d public",
     "predeploy": "rm -rf dist && cp -R public dist && COMMIT=$(git rev-parse --short HEAD) && sed \"s/__COMMIT__/${COMMIT}/g\" dist/index.html > dist/index.tmp && mv dist/index.tmp dist/index.html",
     "deploy": "gh-pages -d dist"
