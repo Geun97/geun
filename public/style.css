@@ -1,86 +1,223 @@
-/* === CSS Variables for Theming === */
 :root {
-    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    --background-color: #f8f9fa;
-    --card-background: #ffffff;
-    --primary-text: #212529;
-    --secondary-text: #495057;
-    --accent-color: #007bff;
-    --accent-color-hover: #0056b3;
-    --border-color: #dee2e6;
-    --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 10px 20px rgba(0, 0, 0, 0.07);
-    --card-border-radius: 12px;
+    --primary-color: #3b82f6;
+    --accent-color: #ef4444;
+    --bg-color: #f3f4f6;
+    --card-bg: #ffffff;
+    --text-primary: #1f2937;
+    --text-secondary: #6b7280;
+    --border-radius: 12px;
 }
 
-/* === Global Styles & Resets === */
 body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: var(--bg-color);
     margin: 0;
-    font-family: var(--font-sans);
-    background-color: var(--background-color);
-    color: var(--primary-text);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    padding: 0;
+    color: var(--text-primary);
 }
 
-*,
-*::before,
-*::after {
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header */
+header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+header p {
+    color: var(--text-secondary);
+}
+
+/* Input View */
+.input-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+.card {
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.badge.my {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.badge.comp {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
     box-sizing: border-box;
 }
 
-/* === Layout === */
-#composer-view, #results-view {
-    max-width: 1200px; /* Increased width for 2-column layout */
-    margin: 40px auto; /* Center the container */
-    padding: 1rem;
-}
-
-/* === Card Styles (for generated results) === */
-.card {
-    background: var(--card-background);
-    border-radius: var(--card-border-radius);
-    box-shadow: var(--card-shadow);
-    padding: 24px;
-}
-
-h3 {
-    color: var(--primary-text);
-    margin-top: 0;
-}
-
-pre {
-    white-space: pre-wrap; /* Wrap long lines of text */
-    background-color: #f1f3f5;
-    padding: 16px;
-    border-radius: 8px;
+.form-group textarea {
     font-family: monospace;
-    line-height: 1.6;
-    color: var(--secondary-text);
+    font-size: 0.9rem;
 }
 
-/* === Buttons (for generated results) === */
-button#copy-btn, button#back-btn {
-    background-color: var(--accent-color);
+.action-bar {
+    text-align: center;
+    margin-top: 40px;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
     color: white;
+    padding: 14px 28px;
     border: none;
-    padding: 12px 20px;
     border-radius: 8px;
-    cursor: pointer;
-    font-size: 16px;
+    font-size: 1.1rem;
     font-weight: bold;
-    transition: background-color 0.2s, transform 0.2s;
-    margin-right: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s;
 }
 
-button#copy-btn:hover, button#back-btn:hover {
-    background-color: var(--accent-color-hover);
-    transform: translateY(-2px);
+.btn-primary:hover {
+    background-color: #2563eb;
 }
 
-/* === Responsive Design === */
-@media (max-width: 768px) {
-    #composer-view, #results-view {
-        margin: 20px auto;
-        padding: 0 16px;
+/* Dashboard View */
+.dashboard {
+    display: none;
+}
+
+.dashboard.active {
+    display: block;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 30px;
+}
+
+.summary-card {
+    background: white;
+    padding: 20px;
+    border-radius: var(--border-radius);
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.summary-card .value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.summary-card .label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    margin: 40px 0 20px;
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 10px;
+}
+
+.chart-bar {
+    height: 24px;
+    background: #e5e7eb;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.chart-fill {
+    height: 100%;
+    background: var(--primary-color);
+}
+
+.action-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.action-table th,
+.action-table td {
+    border: 1px solid #e5e7eb;
+    padding: 12px;
+    text-align: left;
+}
+
+.action-table th {
+    background-color: #f9fafb;
+}
+
+/* Print */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+
+    body {
+        background: white;
+    }
+
+    .card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+
+    .dashboard {
+        display: block !important;
+    }
+
+    .input-view {
+        display: none !important;
     }
 }

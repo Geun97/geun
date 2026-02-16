@@ -1,350 +1,265 @@
 
-import { state, setState, addCompetitor, removeCompetitor, updateCompetitor, setMyLandingUrl, setTopAdsJSON } from './state.js';
+import { state, updateMyData, updateCompetitorData, setDerivedData, resetState } from './state.js';
 import { generateAnalysis } from './templates.js';
-import { exportToMarkdown, copyToClipboard } from './exporters.js';
-
-// A simple utility to generate unique IDs
-const generateId = () => `id_${Math.random().toString(36).substr(2, 9)}`;
 
 class AdComposer extends HTMLElement {
     constructor() {
         super();
-        this.attachShadow({ mode: 'open' });
         this.render();
     }
 
     connectedCallback() {
-        this.addEventListeners();
-        this.renderCompetitors(); // Initial render of competitors
+        // No event listeners here, they are attached in render methods
     }
 
     render() {
-        this.shadowRoot.innerHTML = `
-            <style>
-                :host {
-                    display: block;
-                    font-family: var(--font-sans);
-                }
-                #composer-view {
-                    max-width: 1200px;
-                    margin: 0 auto;
-                }
-                .vs-layout {
-                    display: flex;
-                    gap: 32px;
-                    align-items: flex-start;
-                }
-                .col {
-                    flex: 1;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 16px;
-                }
-                .vs-badge {
-                    font-size: 36px;
-                    font-weight: bold;
-                    color: var(--accent-color);
-                    align-self: center;
-                    margin-top: 90px; 
-                }
-                .card {
-                    background: var(--card-background);
-                    border-radius: var(--card-border-radius);
-                    padding: 24px;
-                    box-shadow: var(--card-shadow);
-                }
-                h2, h3 {
-                    margin-top: 0;
-                    color: var(--primary-text);
-                    font-size: 24px;
-                }
-                .form-group {
-                    margin-bottom: 16px;
-                }
-                label {
-                    display: block;
-                    margin-bottom: 8px;
-                    font-weight: bold;
-                    color: var(--secondary-text);
-                }
-                input, textarea {
-                    width: 100%;
-                    padding: 12px;
-                    border: 1px solid var(--border-color);
-                    border-radius: 8px;
-                    box-sizing: border-box;
-                    background-color: #f8f9fa;
-                    transition: border-color 0.2s, box-shadow 0.2s;
-                }
-                input:focus, textarea:focus {
-                    outline: none;
-                    border-color: var(--accent-color);
-                    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
-                }
-                button {
-                    background-color: #007bff;
-                    color: white;
-                    border: none;
-                    padding: 14px 22px;
-                    border-radius: 8px;
-                    cursor: pointer;
-                    font-size: 16px;
-                    font-weight: bold;
-                    transition: background-color 0.2s, transform 0.2s, box-shadow 0.3s;
-                }
-                button:hover {
-                    background-color: #0056b3;
-                    transform: translateY(-2px);
-                    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
-                }
-                .competitor-card {
-                    position: relative;
-                    padding-top: 20px;
-                }
-                .remove-btn {
-                    position: absolute;
-                    top: 15px;
-                    right: 15px;
-                    background: #dc3545;
-                    font-size: 12px;
-                    padding: 6px 10px;
-                    border-radius: 50%;
-                    width: 30px;
-                    height: 30px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-                h1 {
-                    text-align: center;
-                    font-size: 48px;
-                    color: var(--primary-text);
-                    margin-bottom: 24px;
-                }
-                .placeholder {
-                    border: 2px dashed var(--border-color);
-                    border-radius: var(--card-border-radius);
-                    padding: 24px;
-                    text-align: center;
-                    color: var(--secondary-text);
-                    min-height: 100px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-                 .error-message {
-                    color: #dc3545;
-                    background-color: #f8d7da;
-                    border: 1px solid #f5c6cb;
-                    border-radius: 8px;
-                    padding: 16px;
-                    margin-top: 16px;
-                }
-                .error-message ul {
-                    margin: 0;
-                    padding-left: 20px;
-                }
-
-                @media (max-width: 900px) {
-                    .vs-layout {
-                        flex-direction: column;
-                        align-items: stretch;
-                    }
-                    .vs-badge {
-                        align-self: center;
-                        margin: 16px 0;
-                    }
-                }
-
-            </style>
-
-            <div id="composer-view">
-                <h1>Observer</h1>
-                 <div id="error-container"></div>
-                <div class="vs-layout">
-                    <section class="col ours">
-                        <div class="card">
-                            <h2>Our Company</h2>
-                            <div class="form-group">
-                                <label for="my-landing-url">My Landing Page URL</label>
-                                <input type="url" id="my-landing-url" value="${state.myLandingUrl}" placeholder="https://example.com">
-                            </div>
-                            <div class="form-group">
-                                <label for="top-ads-json">Top Ads Data (JSON) - Optional</label>
-                                <textarea id="top-ads-json" rows="6" placeholder='[{"ad_id": "123", "primary_text": "..."}]'>${state.topAdsJSON || ''}</textarea>
-                            </div>
-                        </div>
-                        <div class="card">
-                           <div class="placeholder">
-                                Placeholder for future features.
-                           </div>
-                        </div>
-                    </section>
-
-                    <div class="vs-badge">VS</div>
-
-                    <section class="col them">
-                        <div class="card">
-                            <h3>Competitors</h3>
-                            <div id="competitors-list"></div>
-                            <button id="add-competitor-btn">+ Add Competitor</button>
-                        </div>
-                    </section>
-                </div>
-                 <button id="generate-btn">분석 시작</button>
-            </div>
-        `;
-    }
-
-    addEventListeners() {
-        const myLandingUrlInput = this.shadowRoot.getElementById('my-landing-url');
-        myLandingUrlInput.addEventListener('change', (e) => {
-            setMyLandingUrl(e.target.value);
-        });
-
-        const topAdsJsonInput = this.shadowRoot.getElementById('top-ads-json');
-        topAdsJsonInput.addEventListener('change', (e) => {
-            setTopAdsJSON(e.target.value);
-        });
-
-
-
-        const addCompetitorBtn = this.shadowRoot.getElementById('add-competitor-btn');
-        addCompetitorBtn.addEventListener('click', () => {
-            const newCompetitor = { id: generateId(), competitorLandingUrl: '', facebookHandle: '', instagramHandle: '', metaAdLibraryUrl: '' };
-            addCompetitor(newCompetitor);
-            this.renderCompetitors();
-        });
-
-        const generateBtn = this.shadowRoot.getElementById('generate-btn');
-        generateBtn.addEventListener('click', () => {
-            const errors = this.validateInputs();
-            if (errors.length > 0) {
-                this.displayErrors(errors);
-                return;
-            }
-            this.clearErrors();
-
-            const resultsView = document.getElementById('results-view');
-            const composerView = document.getElementById('composer-view');
-
-            const analysisHTML = generateAnalysis(state); // Removed .replace(/\n/g, '<br>') because <pre> preserves newlines
-
-            resultsView.innerHTML = `
-                <div class="results-card">
-                  <div class="results-header">
-                    <h2>결과</h2>
-                    <button id="copy-results">복사</button>
-                    <button id="back-to-edit">수정으로</button>
-                  </div>
-                  <pre id="results-text">${analysisHTML}</pre>
-                </div>
-            `;
-
-            resultsView.querySelector('#copy-results').addEventListener('click', () => {
-                copyToClipboard(exportToMarkdown(state));
-                alert('Copied to clipboard!');
-            });
-
-            resultsView.querySelector('#back-to-edit').addEventListener('click', () => {
-                resultsView.style.display = 'none';
-                composerView.style.display = 'block';
-            });
-
-            composerView.style.display = 'none';
-            resultsView.style.display = 'block';
-        });
-
-        this.shadowRoot.getElementById('competitors-list').addEventListener('change', (e) => {
-            const id = e.target.closest('.competitor-card').dataset.id;
-            const key = e.target.name;
-            const value = e.target.value;
-            updateCompetitor(id, key, value);
-        });
-    }
-
-    validateInputs() {
-        const errors = [];
-        if (!state.myLandingUrl) {
-            errors.push('내 서비스: 랜딩페이지 URL이 비어있음');
-        }
-
-        if (state.competitors.length === 0) {
-            errors.push('경쟁사: 최소 1개 이상의 경쟁사를 추가해야 합니다.');
+        this.innerHTML = ''; // Clear content
+        if (state.derived) {
+            this.renderDashboard();
         } else {
-            state.competitors.forEach((c, index) => {
-                if (!c.competitorLandingUrl) {
-                    errors.push(`경쟁사 ${index + 1}: 랜딩페이지 URL이 비어있음`);
-                }
-            });
+            this.renderInputForm();
         }
-
-        return errors;
     }
 
-    displayErrors(errors) {
-        const errorContainer = this.shadowRoot.getElementById('error-container');
-        const errorList = errors.map(e => `<li>${e}</li>`).join('');
-        errorContainer.innerHTML = `
-            <div class="error-message">
-                <ul>${errorList}</ul>
+    // --- INPUT VIEW ---
+    renderInputForm() {
+        this.innerHTML = `
+            <div class="input-view">
+                <div class="input-grid">
+                    <!-- My Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>우리 서비스</h2>
+                            <span class="badge my">My Brand</span>
+                        </div>
+                        <div class="form-group">
+                            <label>랜딩페이지 URL (필수)</label>
+                            <input type="url" id="my-landing-url" value="${state.my.landingUrl || ''}" placeholder="https://my-service.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Meta 광고 라이브러리 URL (선택)</label>
+                            <input type="url" id="my-meta-url" value="${state.my.metaAdLibraryUrl || ''}" placeholder="https://facebook.com/ads/library/...">
+                        </div>
+                        <div class="form-group">
+                            <label>Top Ads Data (JSON) - 선택</label>
+                            <textarea id="my-json" rows="5" placeholder='[{"primary_text": "..."}]'>${state.my.topAdsJsonRaw || ''}</textarea>
+                        </div>
+                         <!-- Fallback for HTML Paste -->
+                        <div class="form-group" style="margin-top:20px; border-top:1px dashed #ddd; padding-top:10px;">
+                            <label>마동 HTML 붙여넣기 (고급 옵션 - CORS 우회용)</label>
+                            <textarea id="my-html-paste" rows="3" placeholder="<html>... 만약 URL 분석이 실패하면 여기에 소스를 붙여넣으세요."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Competitor Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>경쟁사</h2>
+                            <span class="badge comp">Competitor</span>
+                        </div>
+                        <div class="form-group">
+                            <label>랜딩페이지 URL (필수)</label>
+                            <input type="url" id="comp-landing-url" value="${state.competitor.landingUrl || ''}" placeholder="https://competitor.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Meta 광고 라이브러리 URL (선택)</label>
+                            <input type="url" id="comp-meta-url" value="${state.competitor.metaAdLibraryUrl || ''}" placeholder="https://facebook.com/ads/library/...">
+                        </div>
+                        <div class="form-group">
+                            <label>Top Ads Data (JSON) - 선택</label>
+                            <textarea id="comp-json" rows="5" placeholder='[{"primary_text": "..."}]'>${state.competitor.topAdsJsonRaw || ''}</textarea>
+                        </div>
+                         <div class="form-group" style="margin-top:20px; border-top:1px dashed #ddd; padding-top:10px;">
+                            <label>수동 HTML 붙여넣기 (고급 옵션 - CORS 우회용)</label>
+                            <textarea id="comp-html-paste" rows="3" placeholder="<html>..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-bar">
+                    <button id="btn-analyze" class="btn-primary">분석 시작하기 🚀</button>
+                    <div id="error-msg" style="color:red; margin-top:10px;"></div>
+                </div>
             </div>
         `;
+
+        // Bind Events
+        this.querySelector('#my-landing-url').addEventListener('change', e => updateMyData('landingUrl', e.target.value));
+        this.querySelector('#my-meta-url').addEventListener('change', e => updateMyData('metaAdLibraryUrl', e.target.value));
+        this.querySelector('#my-json').addEventListener('change', e => updateMyData('topAdsJsonRaw', e.target.value));
+
+        this.querySelector('#comp-landing-url').addEventListener('change', e => updateCompetitorData('landingUrl', e.target.value));
+        this.querySelector('#comp-meta-url').addEventListener('change', e => updateCompetitorData('metaAdLibraryUrl', e.target.value));
+        this.querySelector('#comp-json').addEventListener('change', e => updateCompetitorData('topAdsJsonRaw', e.target.value));
+
+        this.querySelector('#btn-analyze').addEventListener('click', () => this.handleAnalyze());
     }
 
-    clearErrors() {
-        const errorContainer = this.shadowRoot.getElementById('error-container');
-        errorContainer.innerHTML = '';
-    }
+    // --- DASHBOARD VIEW ---
+    renderDashboard() {
+        const d = state.derived;
+        const myAdsCount = d.ads.my ? d.ads.my.count : 0;
+        const compAdsCount = d.ads.competitor ? d.ads.competitor.count : 0;
+        const matchScore = d.match.messageMatchScore;
 
-    renderCompetitors() {
-        const competitorsList = this.shadowRoot.getElementById('competitors-list');
-        competitorsList.innerHTML = ''; // Clear existing
-        state.competitors.forEach(c => {
-            const competitorEl = document.createElement('div');
-            competitorEl.classList.add('card', 'competitor-card');
-            competitorEl.dataset.id = c.id;
-            competitorEl.innerHTML = `
-                <button class="remove-btn">X</button>
-                <div class="form-group">
-                    <label>Competitor Landing Page URL</label>
-                    <input type="url" name="competitorLandingUrl" value="${c.competitorLandingUrl}" placeholder="https://competitor.com">
+        this.innerHTML = `
+            <div class="dashboard active">
+                <div class="dashboard-header no-print">
+                    <button id="btn-reset" style="padding:8px 16px; cursor:pointer;">← 다시 입력</button>
+                    <div style="flex:1;"></div>
+                    <button id="btn-print" class="btn-primary" style="font-size:0.9rem;">PDF 다운로드 / 인쇄</button>
                 </div>
-                <div class="form-group">
-                    <label>Facebook Handle</label>
-                    <input type="text" name="facebookHandle" value="${c.facebookHandle}" placeholder="@competitor">
+
+                <!-- Summary Cards -->
+                <div class="summary-cards">
+                     <div class="summary-card">
+                        <div class="value">${myAdsCount} vs ${compAdsCount}</div>
+                        <div class="label">광고 수 (내꺼 vs 경쟁사)</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="value">${matchScore}점</div>
+                        <div class="label">광고-랜딩 메시지 일치도</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="value">${d.actions.length}개</div>
+                        <div class="label">제안된 액션 아이템</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="value">${new Date(d.timestamps.analyzedAtISO).toLocaleDateString()}</div>
+                        <div class="label">분석 일자</div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Instagram Handle</label>
-                    <input type="text" name="instagramHandle" value="${c.instagramHandle}" placeholder="@competitor">
+
+                <!-- Section 1: Source Info -->
+                <h3 class="section-title">1. 데이터 출처 및 수집 상태</h3>
+                <div class="card">
+                     <p><strong>내 랜딩:</strong> <a href="${state.my.landingUrl}" target="_blank">${state.my.landingUrl}</a></p>
+                     <p><strong>경쟁사 랜딩:</strong> <a href="${state.competitor.landingUrl}" target="_blank">${state.competitor.landingUrl}</a></p>
+                     <p style="font-size:0.9rem; color:#666;">* Meta 광고 라이브러리와 HTML 소스 코드를 기반으로 분석되었습니다.</p>
                 </div>
-                 <div class="form-group">
-                    <label>Meta Ad Library URL (Optional)</label>
-                    <input type="url" name="metaAdLibraryUrl" value="${c.metaAdLibraryUrl}" placeholder="https://www.facebook.com/ads/library/?active_status=all&ad_type=all&country=ALL&q=competitor&sort_data[direction]=desc&sort_data[mode]=relevancy_monthly_grouped">
+
+                <!-- Section 2: Ad Analysis -->
+                <h3 class="section-title">2. 광고 크리에이티브 패턴 비교</h3>
+                <div class="input-grid">
+                    <div class="card">
+                        <h4>📢 내 광고 패턴</h4>
+                        <p><strong>Hooks:</strong> ${d.ads.my?.hooks.join(', ') || '데이터 없음'}</p>
+                        <p><strong>Offers:</strong> ${d.ads.my?.offers.join(', ') || '-'}</p>
+                    </div>
+                    <div class="card">
+                        <h4>⚔️ 경쟁사 광고 패턴</h4>
+                        <p><strong>Hooks:</strong> ${d.ads.competitor?.hooks.join(', ') || '데이터 없음'}</p>
+                        <p><strong>Offers:</strong> ${d.ads.competitor?.offers.join(', ') || '-'}</p>
+                    </div>
                 </div>
-            `;
-            competitorEl.querySelector('.remove-btn').addEventListener('click', () => {
-                removeCompetitor(c.id);
-                this.renderCompetitors();
-            });
-            competitorsList.appendChild(competitorEl);
+
+                <!-- Section 3: Landing Analysis -->
+                <h3 class="section-title">3. 랜딩 페이지 내러티브 구조</h3>
+                <div class="card">
+                    <h4>내 랜딩 페이지 구조 (추정)</h4>
+                    <ul>
+                        ${d.landing.my.sections.map(s => `<li><strong>[${s.type}]</strong> ${s.text}</li>`).join('') || '<li>구조 분석 실패 (HTML data missing)</li>'}
+                    </ul>
+                </div>
+
+                <!-- Section 4: Gap Analysis -->
+                <h3 class="section-title">4. 전략적 갭 (Gap Analysis)</h3>
+                <div class="card">
+                    <div class="chart-bar"><div class="chart-fill" style="width: ${d.match.messageMatchScore}%"></div></div>
+                    <p><strong>메시지 일치도 (${d.match.messageMatchScore}%):</strong> 광고의 훅킹 메시지가 랜딩 상단에 유지되는지 평가</p>
+                    
+                    <div class="chart-bar"><div class="chart-fill" style="width: ${d.match.offerMatchScore}%"></div></div>
+                    <p><strong>오퍼 일치도 (${d.match.offerMatchScore}%):</strong> 광고의 가격/혜택이 랜딩에 명확히 명시되었는지 평가</p>
+
+                    <div style="margin-top:16px;">
+                        <strong>🕵️ 분석 노트:</strong>
+                        <ul>${d.match.notes.map(n => `<li>${n}</li>`).join('')}</ul>
+                    </div>
+                </div>
+
+                <!-- Section 5: Action Plan -->
+                <h3 class="section-title">5. 우선순위 액션 플랜 (Action Plan)</h3>
+                <div class="card">
+                    <table class="action-table">
+                        <thead>
+                            <tr>
+                                <th>액션 항목</th>
+                                <th>근거 (Why)</th>
+                                <th>Impact</th>
+                                <th>Effort</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${d.actions.map(act => `
+                                <tr>
+                                    <td><strong>${act.title}</strong></td>
+                                    <td>자동 진단 결과</td>
+                                    <td><span class="badge" style="background:#fee2e2; color:#991b1b;">${act.impact}</span></td>
+                                    <td>${act.effort}</td>
+                                </tr>
+                            `).join('')}
+                             ${d.actions.length === 0 ? '<tr><td colspan="4">발견된 주요 개선사항이 없습니다. 훌륭합니다!</td></tr>' : ''}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="height:50px;"></div>
+            </div>
+        `;
+
+        this.querySelector('#btn-reset').addEventListener('click', () => {
+            if (confirm('입력 내용을 초기화하고 처음으로 돌아가시겠습니까?')) {
+                resetState();
+                this.render();
+            }
         });
+
+        this.querySelector('#btn-print').addEventListener('click', () => {
+            window.print();
+        });
+    }
+
+    async handleAnalyze() {
+        const btn = this.querySelector('#btn-analyze');
+        const err = this.querySelector('#error-msg');
+
+        if (!state.my.landingUrl || !state.competitor.landingUrl) {
+            err.textContent = '랜딩 페이지 URL은 필수 입력 항목입니다.';
+            return;
+        }
+
+        btn.textContent = '분석중...';
+        btn.disabled = true;
+        err.textContent = '';
+
+        // Simulate fetching or use pasted HTML
+        const myPasted = this.querySelector('#my-html-paste')?.value;
+        const compPasted = this.querySelector('#comp-html-paste')?.value;
+
+        // In a real app we would fetch here. For static, we rely on paste or just pass empty strings if CORS fails.
+        // We'll pass the pasted content as the "HTML Source".
+
+        // Wait a bit to simulate processing
+        setTimeout(() => {
+            try {
+                const derived = generateAnalysis(state, myPasted, compPasted);
+                setDerivedData(derived);
+                this.render(); // Re-render to dashboard
+            } catch (e) {
+                console.error(e);
+                err.textContent = '분석 중 오류가 발생했습니다. 데이터 형식을 확인해주세요.';
+                btn.textContent = '분석 시작하기 🚀';
+                btn.disabled = false;
+            }
+        }, 800);
     }
 }
 
 customElements.define('ad-composer', AdComposer);
 
-// Initial render logic
 const render = () => {
-    const composerView = document.getElementById('composer-view');
-    const resultsView = document.getElementById('results-view');
-
-    if (!document.querySelector('ad-composer')) {
-        composerView.innerHTML = '<ad-composer></ad-composer>';
-    }
-
-    composerView.style.display = 'block';
-    resultsView.style.display = 'none';
+    // Boilerplate if needed, but the component handles itself
 };
 
 export { render };
+
