@@ -25,6 +25,7 @@ Observer is a web-based tool designed to analyze ad campaigns from the Meta Ad L
     - **My Ads:** A section to display the ad creatives (images/videos) associated with the user's brand.
     - **Top 3 Competitors:** A section showcasing the ad creatives from the top three competing brands.
     - **Insights Document:** A formatted section presenting key takeaways, performance metrics, and strategic recommendations.
+- **Dark/Light Mode Toggle:** A user-controlled switch to change between a light and dark theme for comfortable viewing in different lighting conditions.
 - **Web Components:**
     - `observer-header`: The main application header.
     - `url-input-form`: The URL input form.
@@ -34,15 +35,17 @@ Observer is a web-based tool designed to analyze ad campaigns from the Meta Ad L
 
 ## Current Plan
 
-### **Phase 1: UI/UX and Mock Data Implementation**
-1. **Structure (`index.html`):**
-   - Set up the main HTML document with the title "옵저버 (Observer)".
-   - Create the main layout containers for the header, input form, and results.
-2. **Styling (`style.css`):**
-   - Implement the modern design aesthetic.
-   - Style all UI components, including the form, buttons, and result sections/cards.
-   - Ensure the layout is responsive and works on different screen sizes.
-3. **Logic (`main.js`):**
-   - Define all the necessary Web Components (`observer-header`, `url-input-form`, `results-display`, `ad-card`, `insight-document`).
-   - Add an event listener to the form to handle submission.
-   - On submission, dynamically render the `results-display` component and populate it with **mock data** to simulate the analysis output. This will provide a functional front-end and a clear demonstration of the tool's capabilities.
+### **Phase 2: Dark/Light Mode and Deployment**
+1.  **`blueprint.md` Update:** Add the "Dark/Light Mode Toggle" feature.
+2.  **CSS (`style.css`):**
+    - Define CSS variables for light and dark themes.
+    - Apply theme styles based on a `body.dark-mode` class.
+3.  **HTML (`index.html`):**
+    - Add a toggle switch element to the header area.
+4.  **JavaScript (`main.js`):**
+    - Implement the logic for the theme toggle.
+    - The toggle will add/remove the `dark-mode` class on the `<body>`.
+    - User's preference will be saved to `localStorage`.
+5.  **Deployment:**
+    - Commit all changes to the local Git repository.
+    - Push the changes to the remote GitHub repository.

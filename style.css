@@ -7,14 +7,33 @@
     --white: #FFFFFF;
     --shadow-color: rgba(0, 0, 0, 0.1);
     --font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+
+    /* Light Theme */
+    --background: var(--secondary-color);
+    --card-background: var(--white);
+    --text: var(--text-color);
+    --header-background: var(--white);
+    --header-shadow: var(--shadow-color);
+}
+
+body.dark-mode {
+    /* Dark Theme */
+    --primary-color: #4dabf7; /* A lighter blue for dark mode */
+    --background: #121212;
+    --card-background: #1E1E1E;
+    --text: #E0E0E0;
+    --header-background: #1E1E1E;
+    --header-shadow: rgba(0, 0, 0, 0.5);
+    --light-grey: #333;
 }
 
 body {
     font-family: var(--font-family);
-    background-color: var(--secondary-color);
-    color: var(--text-color);
+    background-color: var(--background);
+    color: var(--text);
     margin: 0;
     line-height: 1.6;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 main {
@@ -26,10 +45,11 @@ main {
 /* Header */
 observer-header {
     display: block;
-    background-color: var(--white);
+    background-color: var(--header-background);
     padding: 1rem 2rem;
     border-bottom: 1px solid var(--light-grey);
-    box-shadow: 0 2px 4px var(--shadow-color);
+    box-shadow: 0 2px 4px var(--header-shadow);
+    transition: background-color 0.3s;
 }
 
 /* Input Form */
@@ -60,11 +80,11 @@ url-input-form {
 }
 
 .ad-card {
-    background-color: var(--white);
+    background-color: var(--card-background);
     border-radius: 8px;
     box-shadow: 0 4px 8px var(--shadow-color);
     overflow: hidden;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.3s;
 }
 
 .ad-card:hover {
@@ -84,15 +104,17 @@ url-input-form {
 .ad-card-content p {
     margin: 0;
     font-size: 0.9rem;
-    color: #666;
+    color: var(--text);
+    opacity: 0.8;
 }
 
 /* Insight Document */
 .insight-document {
-    background-color: var(--white);
+    background-color: var(--card-background);
     padding: 2rem;
     border-radius: 8px;
     box-shadow: 0 4px 8px var(--shadow-color);
+    transition: background-color 0.3s;
 }
 
 .insight-document h3 {
