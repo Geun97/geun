@@ -1,109 +1,162 @@
-
-:root {
-    --primary-color: #0078FF;
-    --secondary-color: #F0F2F5;
-    --text-color: #333;
-    --light-grey: #E9EBEE;
-    --white: #FFFFFF;
-    --shadow-color: rgba(0, 0, 0, 0.1);
-    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-
-    /* Theme Variables */
-    --background: var(--secondary-color);
-    --card-background: var(--white);
-    --text: var(--text-color);
-    --header-background: var(--white);
-    --header-shadow: var(--shadow-color);
-    --text-secondary: #65676b;
-    --secondary-button-bg: #6c757d;
-}
-
-body.dark-mode {
-    --primary-color: #4dabf7;
-    --background: #121212;
-    --card-background: #1E1E1E;
-    --text: #E0E0E0;
-    --header-background: #1E1E1E;
-    --header-shadow: rgba(0, 0, 0, 0.5);
-    --light-grey: #333;
-    --text-secondary: #adb5bd;
-    --secondary-button-bg: #495057;
-}
-
+/* Basic styles for the new layout */
 body {
-    font-family: var(--font-family);
-    background-color: var(--background);
-    color: var(--text);
+    font-family: sans-serif;
+    background-color: #f0f2f5;
+    color: #333;
     margin: 0;
-    line-height: 1.6;
-    transition: background-color 0.3s, color 0.3s;
 }
 
 main {
     padding: 2rem;
-    max-width: 1200px;
+    max-width: 900px;
     margin: 0 auto;
 }
 
 observer-header {
     display: block;
-    background-color: var(--header-background);
+    background-color: #fff;
     padding: 1rem 2rem;
-    border-bottom: 1px solid var(--light-grey);
-    box-shadow: 0 2px 4px var(--header-shadow);
-    transition: background-color 0.3s;
-}
-
-url-input-form {
-    display: block;
-    margin-bottom: 2rem;
-}
-
-#results-container {
-    display: grid;
-    gap: 2rem;
-}
-
-/* Modal Styles */
-.modal-overlay {
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.modal-content {
-    margin: auto;
-    display: block;
-    max-width: 80%;
-    max-height: 80%;
-}
-
-.modal-close {
-    position: absolute;
-    top: 20px;
-    right: 35px;
-    color: #f1f1f1;
-    font-size: 40px;
+    border-bottom: 1px solid #ddd;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    font-size: 1.5rem;
     font-weight: bold;
-    transition: 0.3s;
-    cursor: pointer;
+    color: #0078FF;
 }
 
-.modal-close:hover, .modal-close:focus {
-    color: #bbb;
-    text-decoration: none;
-    cursor: pointer;
+#composer-container {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-/* General transition for smooth theme changes */
-* {
-    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+h1 {
+    font-size: 1.8rem;
+    margin-top: 0;
+}
+
+fieldset {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+legend {
+    font-weight: bold;
+    font-size: 1.2rem;
+    padding: 0 0.5rem;
+    color: #333;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.full-width {
+    grid-column: 1 / -1;
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+input[type="url"],
+input[type="text"],
+textarea,
+select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    box-sizing: border-box; /* Important */
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #0078FF;
+    box-shadow: 0 0 0 2px rgba(0, 120, 255, 0.2);
+}
+
+textarea {
+    resize: vertical;
+}
+
+.optional-toggle {
+    color: #0078FF;
+    cursor: pointer;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.optional-content {
+    display: none;
+    padding-top: 1rem;
+    border-top: 1px dashed #ccc;
+}
+
+.optional-content.visible {
+    display: block;
+}
+
+.competitor-fieldset {
+    position: relative;
+    border-color: #e0e0e0;
+}
+
+.remove-competitor-btn {
+    position: absolute;
+    top: 1.2rem;
+    right: 1.5rem;
+    background: #ff4d4d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 0.3rem 0.6rem;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+    border-top: 1px solid #eee;
+    padding-top: 2rem;
+}
+
+button {
+    padding: 0.8rem 1.5rem;
+    border-radius: 6px;
+    border: none;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#add-competitor-btn {
+    background-color: #e9ecef;
+    color: #333;
+    border: 1px solid #ccc;
+}
+
+#analyze-btn {
+    background-color: #0078FF;
+    color: white;
+}
+
+#reset-btn {
+    background: none;
+    border: none;
+    color: #6c757d;
+    text-decoration: underline;
 }

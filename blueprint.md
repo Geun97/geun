@@ -1,68 +1,90 @@
+# **Project Blueprint: The Observer**
 
-# Blueprint: Observer - Meta Ad Analysis Tool
+## **1. Application Overview**
 
-## Overview
+**The Observer** is a web-based application designed for marketers, growth engineers, and creative strategists. It allows users to input their landing page and competitor advertising materials (from the Meta Ad Library) to generate a comprehensive, MECE-structured analysis.
 
-Observer is a web-based tool designed to analyze ad campaigns from the Meta Ad Library. Users can input a URL to an ad library, and the tool will provide a breakdown of their own ad materials, a look at the top three competitors, and a document with actionable insights.
+The application deconstructs competitor ads, compares landing pages, identifies strategic gaps, and automatically generates creative strategies and A/B testing templates to accelerate growth.
 
-## Project Outline
+---
 
-### 1. **Design & Style**
-- **Aesthetic:** Modern, clean, and intuitive.
-- **Layout:** A single-page application with a clear input section and a structured results display.
-- **Color Palette:** A professional palette using blues, greys, and whites, with accent colors to highlight key information.
-- **Typography:** Clear, legible fonts to ensure readability of analysis data.
-- **Iconography:** Use of icons to improve usability and visual appeal.
-- **Components:**
-    - Styled input fields and buttons with hover/focus effects.
-    - Cards for displaying ad creatives.
-    - Visually distinct sections for "My Ads," "Competitors," and "Insights."
+## **2. Core Features & Architecture**
 
-### 2. **Features & Functionality**
-- **URL Input:** A primary input field for the user to paste a Meta Ad Library URL.
-- **Link Auto-fill:** A button that, when clicked, uses the `library_url` to fetch and populate key analysis fields, without overwriting any user-entered data.
-- **Analysis Trigger:** A button to initiate the analysis process. This process will automatically perform the auto-fill action if key fields are empty before proceeding. It includes loading/error state handling and a single retry on server failure.
-- **Media Upload:** A multi-file input for users to upload their own images and videos (`image/*`, `video/*`). An instruction message clarifies that uploaded media will be used for display in the results.
-- **Results Display:**
-    - **My Ads:** A section to display the ad creatives. **Crucially, this section will display the user-uploaded images and videos.** Images will be shown as thumbnails with an option to view larger, and videos will be playable.
-    - **Top 3 Competitors:** A section showcasing the ad creatives from the top three competing brands, fetched from the library.
-    - **Insights Document:** A formatted section presenting key takeaways, performance metrics, and strategic recommendations.
-- **Dark/Light Mode Toggle:** A user-controlled switch to change between a light and dark theme.
-- **Partnership Inquiry Form:** A simple form to allow users to send partnership inquiries.
+The application is a single-page application (SPA) built with modern, framework-less web technologies (Web Components, ES Modules). The workflow is divided into two main parts: **The Composer** (input) and **The Results** (output).
 
-- **Web Components:**
-    - `observer-header`: The main application header.
-    - `url-input-form`: The URL input form, now including auto-fill and media upload capabilities.
-    - `results-display`: The container for all analysis results.
-    - `ad-card`: A reusable component to display individual ad creatives, now capable of rendering local `Blob` URLs for uploaded media.
-    - `insight-document`: A component to display the final insights.
-    - `contact-form`: The partnership inquiry form.
+### **2.1. The Composer (Input Stage)**
 
-## Current Plan
+A comprehensive form interface for gathering all necessary data for the analysis.
 
-### **Phase 4: Advanced Analysis & Media Upload**
-1.  **`blueprint.md` Update:** Document the new features: Link Auto-fill, enhanced Analysis Execution, and Image/Video Uploads.
-2.  **HTML (`index.html`):**
-    - Add a "링크 자동 채우기" (Auto-fill Link) button next to the "분석 실행" (Execute Analysis) button.
-    - Add a file input element (`<input type="file" multiple>`) for media uploads.
-    - Include the specified informational text: “Meta 라이브러리 링크는 자동 분석용이며, 이미지/영상은 업로드 파일 기준으로 표시됩니다.”
-3.  **JavaScript (`main.js`):**
-    - **Auto-fill Logic:** Implement a function `autoFillFields()` that fetches data based on the `library_url`. It will check each target input field and update it only if it's empty.
-    - **Analysis Logic Enhancement:**
-        - Modify the "분석 실행" event listener to call `autoFillFields()` if essential inputs are missing.
-        - Implement loading state UI (e.g., button text change, spinner).
-        - Wrap the core analysis `fetch` call in a retry mechanism (e.g., a function that attempts the fetch and retries once on failure).
-    - **File Handling:**
-        - Create a variable to store the uploaded files.
-        - Add an event listener to the file input to update this variable when files are selected.
-    - **Results Rendering:**
-        - Update the `ad-card` or the logic that creates it.
-        - It must now use `URL.createObjectURL()` on the stored file `Blob`s to generate local URLs for the `src` attribute of `<img>` and `<video>` tags.
-        - Ensure `<video>` elements have the `controls` attribute.
-        - Add a click event to images to show a larger version (e.g., in a simple modal overlay).
-4.  **CSS (`style.css`):**
-    - Add styles for the new file input and buttons to align with the existing design.
-    - Style the image modal/enlarged view.
-5.  **Deployment:**
-    - Verify all functionalities end-to-end in a local preview.
-    - Commit all changes.
+*   **My Service:**
+    *   [Required] Landing Page URL.
+    *   [Optional] Core Offer, Pricing, Social Proof, Constraints, FAQ.
+*   **Competitors (1-3):**
+    *   [Required] Landing Page URL.
+    *   [Required] Meta Ad Library URL.
+    *   [Optional] Ad Details: Primary Text, Headline, Description, CTA.
+    *   [Optional] Ad Format: Feed, Reels, Stories, Carousel.
+    *   [Optional] Media: File Upload or Media URL.
+*   **Key Functionality:**
+    *   **Dynamic Competitor Forms:** Users can add or remove competitor sections.
+    *   **Input Validation:** Ensures all required fields and correct URL formats are provided.
+    *   **State Management:** All input values are automatically saved to `localStorage` and restored on page load. A "Reset" button is available.
+
+### **2.2. The Results (Output Stage)**
+
+A structured, multi-section report generated from the user's input.
+
+*   **Ad Preview (`AdCard` Component):**
+    *   Visually reconstructs ads to mimic the Meta Ad Library UI.
+    *   Supports various formats (Image, Video, Carousel) and layouts (1:1, 4:5, 9:16).
+    *   Includes all key elements: Advertiser, text, media, CTA, etc.
+*   **Frame Gallery:**
+    *   Displays the user's and competitors' ads within different standard creative frames (e.g., Reels with safe zones).
+*   **Landing Page Comparison:**
+    *   Side-by-side comparison of "My Service" vs. "Competitors".
+    *   Pulls `og:image`, `title`, and `description` from URLs via a server-side function.
+    *   Displays key elements like Core Value, CTA, and Trust Elements.
+*   **MECE Analysis & Strategy:**
+    *   A multi-part, auto-generated report containing:
+        1.  **Market Context:** Customer problems, resistance, and competitive landscape.
+        2.  **My Service Diagnosis:** Analysis of the user's own landing page funnel.
+        3.  **Competitor Deep-Dive:** Funnel analysis for each competitor.
+        4.  **MECE Comparison Matrix:** A structured comparison of hooks, messaging, offers, and proof.
+        5.  **Creative Strategy:** Actionable A/B test ideas and format recommendations.
+        6.  **Growth Landing Page Template:** A ready-to-use A/B test plan with hypothesis, metrics, and sample copy.
+    *   **Exportable:** The entire analysis can be copied to the clipboard as Markdown.
+
+### **2.3. Technical Implementation**
+
+*   **Frontend:** HTML5, CSS3, JavaScript (ESM).
+    *   **Web Components:** For creating encapsulated, reusable UI elements (`AdCard`, `LandingCompare`, etc.).
+    *   **Shadow DOM:** To prevent style conflicts.
+*   **Backend (Serverless):**
+    *   **Cloudflare Pages Functions:** A serverless function (`/api/og`) will be used to fetch Open Graph metadata from URLs, bypassing browser CORS restrictions.
+*   **Styling:**
+    *   Modern CSS features (Container Queries, Cascade Layers, `:has()`).
+    *   CSS Variables for robust theming (Light/Dark mode).
+*   **Data Persistence:** Browser `localStorage` for form state.
+
+---
+
+## **3. Current Development Plan: Phase 1 - The Composer**
+
+This phase focuses on completely rebuilding the input form to match the new, detailed requirements.
+
+1.  **Blueprint Finalization:** The existing `blueprint.md` will be replaced with this document.
+2.  **HTML Refactoring (`index.html`):**
+    *   The existing `<url-input-form>` will be removed.
+    *   A new, highly-structured form will be created.
+    *   A `<template>` for the repeatable competitor section will be defined.
+    *   Sections for "My Service" and "Competitors" will be clearly laid out with all the new required and optional fields.
+3.  **JavaScript Logic (`main.js`):**
+    *   The `UrlInputForm` custom element will be entirely rewritten.
+    *   It will manage the state of all new input fields.
+    *   Functions will be implemented to dynamically add and remove competitor form sections based on the template.
+    *   A robust `saveState` and `loadState` method will be created to interact with `localStorage`.
+    *   Input validation logic will be added to the "Analyze" button's event listener.
+4.  **CSS Styling (`style.css`):**
+    *   New styles will be added to make the complex form intuitive and visually appealing.
+    *   Styles for input groups, labels, and buttons will be refined.
+
