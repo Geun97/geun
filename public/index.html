@@ -15,7 +15,10 @@
 
     <script src="main.js" type="module"></script>
     <footer>
-        <p>BUILD: </p>
+        <p>BUILD: <span id="build-time"></span></p>
     </footer>
+    <script>
+        document.getElementById('build-time').textContent = new Date().toLocaleString();
+    </script>
 </body>
 </html>
