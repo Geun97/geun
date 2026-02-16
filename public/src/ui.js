@@ -1,5 +1,5 @@
 
-import { state, setState, addCompetitor, removeCompetitor, updateCompetitor, setMyLandingUrl } from './state.js';
+import { state, setState, addCompetitor, removeCompetitor, updateCompetitor, setMyLandingUrl, setTopAdsJSON } from './state.js';
 import { generateAnalysis } from './templates.js';
 import { exportToMarkdown, copyToClipboard } from './exporters.js';
 
@@ -169,6 +169,10 @@ class AdComposer extends HTMLElement {
                                 <label for="my-landing-url">My Landing Page URL</label>
                                 <input type="url" id="my-landing-url" value="${state.myLandingUrl}" placeholder="https://example.com">
                             </div>
+                            <div class="form-group">
+                                <label for="top-ads-json">Top Ads Data (JSON) - Optional</label>
+                                <textarea id="top-ads-json" rows="6" placeholder='[{"ad_id": "123", "primary_text": "..."}]'>${state.topAdsJSON || ''}</textarea>
+                            </div>
                         </div>
                         <div class="card">
                            <div class="placeholder">
@@ -197,6 +201,13 @@ class AdComposer extends HTMLElement {
         myLandingUrlInput.addEventListener('change', (e) => {
             setMyLandingUrl(e.target.value);
         });
+
+        const topAdsJsonInput = this.shadowRoot.getElementById('top-ads-json');
+        topAdsJsonInput.addEventListener('change', (e) => {
+            setTopAdsJSON(e.target.value);
+        });
+
+
 
         const addCompetitorBtn = this.shadowRoot.getElementById('add-competitor-btn');
         addCompetitorBtn.addEventListener('click', () => {

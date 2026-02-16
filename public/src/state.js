@@ -1,6 +1,7 @@
 let state = {
   myLandingUrl: '',
   competitors: [],
+  topAdsJSON: '',
 };
 
 // Function to load state from localStorage
@@ -50,4 +51,9 @@ const updateCompetitor = (id, key, value) => {
   }
 };
 
-export { state, setState, setMyLandingUrl, addCompetitor, removeCompetitor, updateCompetitor };
+const setTopAdsJSON = (json) => {
+  state.topAdsJSON = json;
+  saveState();
+}
+
+export { state, setState, setMyLandingUrl, addCompetitor, removeCompetitor, updateCompetitor, setTopAdsJSON };
