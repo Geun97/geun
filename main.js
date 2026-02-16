@@ -313,8 +313,119 @@ class InsightDocument extends HTMLElement {
     }
 }
 
+class ContactForm extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' });
+    this.shadowRoot.innerHTML = `
+      <style>
+        section {
+            background-color: var(--card-background);
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px var(--shadow-color);
+            margin-top: 2rem;
+        }
+        h2 {
+            color: var(--primary-color);
+            margin-top: 0;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        input, textarea {
+            padding: 0.8rem;
+            border: 1px solid var(--light-grey, #E9EBEE);
+            border-radius: 4px;
+            font-size: 1rem;
+            background-color: var(--background);
+            color: var(--text);
+            font-family: var(--font-family);
+        }
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+        button {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            background-color: var(--primary-color, #0078FF);
+            color: var(--white, #FFFFFF);
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        button:hover {
+            filter: brightness(1.2);
+        }
+        #form-status {
+            margin-top: 1rem;
+            font-weight: bold;
+        }
+      </style>
+      <section>
+        <h2>Partnership Inquiry</h2>
+        <form id="contact-form" action="https://formspree.io/f/xreaqnrp" method="POST">
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="message">Message</label>
+            <textarea id="message" name="message" required></textarea>
+
+            <button type="submit">Send Message</button>
+        </form>
+        <div id="form-status"></div>
+      </section>
+    `;
+  }
+
+  connectedCallback() {
+    const form = this.shadowRoot.querySelector('#contact-form');
+    const status = this.shadowRoot.querySelector('#form-status');
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const data = new FormData(e.target);
+      
+      try {
+        const response = await fetch(e.target.action, {
+          method: 'POST',
+          body: data,
+          headers: {
+              'Accept': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          status.textContent = "Thanks for your submission!";
+          status.style.color = "green";
+          form.reset();
+        } else {
+            const responseData = await response.json();
+            if (Object.hasOwn(responseData, 'errors')) {
+                status.textContent = responseData["errors"].map(error => error["message"]).join(", ");
+            } else {
+                status.textContent = "Oops! There was a problem submitting your form";
+            }
+            status.style.color = "red";
+        }
+      } catch (error) {
+        status.textContent = "Oops! There was a problem submitting your form";
+        status.style.color = "red";
+      }
+    });
+  }
+}
+
 customElements.define('observer-header', ObserverHeader);
 customElements.define('url-input-form', UrlInputForm);
 customElements.define('results-display', ResultsDisplay);
 customElements.define('ad-card', AdCard);
 customElements.define('insight-document', InsightDocument);
+customElements.define('contact-form', ContactForm);
