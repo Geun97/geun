@@ -204,7 +204,7 @@ class AdComposer extends HTMLElement {
             addCompetitor(newCompetitor);
             this.renderCompetitors();
         });
-        
+
         const generateBtn = this.shadowRoot.getElementById('generate-btn');
         generateBtn.addEventListener('click', () => {
             const errors = this.validateInputs();
@@ -217,23 +217,25 @@ class AdComposer extends HTMLElement {
             const resultsView = document.getElementById('results-view');
             const composerView = document.getElementById('composer-view');
 
-            const analysisHTML = generateAnalysis(state).replace(/\n/g, '<br>');
+            const analysisHTML = generateAnalysis(state); // Removed .replace(/\n/g, '<br>') because <pre> preserves newlines
 
             resultsView.innerHTML = `
-                <div class="card">
-                    <h3>Generated Analysis</h3>
-                    <pre>${analysisHTML}</pre>
-                    <button id="copy-btn">Copy Markdown</button>
-                    <button id="back-btn">Back to Composer</button>
+                <div class="results-card">
+                  <div class="results-header">
+                    <h2>결과</h2>
+                    <button id="copy-results">복사</button>
+                    <button id="back-to-edit">수정으로</button>
+                  </div>
+                  <pre id="results-text">${analysisHTML}</pre>
                 </div>
             `;
-            
-            resultsView.querySelector('#copy-btn').addEventListener('click', () => {
+
+            resultsView.querySelector('#copy-results').addEventListener('click', () => {
                 copyToClipboard(exportToMarkdown(state));
                 alert('Copied to clipboard!');
             });
-            
-            resultsView.querySelector('#back-btn').addEventListener('click', () => {
+
+            resultsView.querySelector('#back-to-edit').addEventListener('click', () => {
                 resultsView.style.display = 'none';
                 composerView.style.display = 'block';
             });
@@ -325,7 +327,7 @@ customElements.define('ad-composer', AdComposer);
 const render = () => {
     const composerView = document.getElementById('composer-view');
     const resultsView = document.getElementById('results-view');
-    
+
     if (!document.querySelector('ad-composer')) {
         composerView.innerHTML = '<ad-composer></ad-composer>';
     }
