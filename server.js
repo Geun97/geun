@@ -44,6 +44,34 @@ app.post('/api/scrape/meta-ads', async (req, res) => {
   }
 });
 
+// API: Debug Scrape (Returns Screenshot)
+app.post('/api/debug-scrape', async (req, res) => {
+  const { metaAdLibraryUrl } = req.body;
+  if (!metaAdLibraryUrl) return res.status(400).json({ error: "URL required" });
+
+  try {
+    console.log(`[Debug] Scraping: ${metaAdLibraryUrl}`);
+    const result = await scrapeMetaAds(metaAdLibraryUrl, 1); // Limit 1 for speed
+
+    if (!result.ok && result.debugScreenshot) {
+      // Return HTML with image to visualize immediately
+      const html = `
+                <h1>Scrape Failed</h1>
+                <p>Error: ${result.debug}</p>
+                <img src="data:image/jpeg;base64,${result.debugScreenshot}" style="max-width:100%; border:1px solid red;">
+             `;
+      res.set('Content-Type', 'text/html');
+      res.send(html);
+    } else if (result.ok) {
+      res.json(result);
+    } else {
+      res.status(500).json(result);
+    }
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Fallback for SPA (if we had client-side routing, but here just serve index)
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
